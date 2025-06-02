@@ -40,7 +40,7 @@ function App() {
                 <PrivateRoute>
                   <Navigation />
                   <Routes>
-                    <Route path="/\" element={<Navigate to="/atvik\" replace />} />
+                    <Route path="/" element={<Navigate to="/atvik" replace />} />
                     <Route
                       path="/atvik"
                       element={
