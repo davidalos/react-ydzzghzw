@@ -11,6 +11,7 @@ import GoalUpdateForm from './GoalUpdateForm';
 import GoalProgressChart from './GoalProgressChart';
 import { ManagerDashboard } from './components/ManagerDashboard';
 import { PrivateRoute } from './components/PrivateRoute';
+import { Navigation } from './components/Navigation';
 import { useAuth } from './hooks/useAuth';
 
 const queryClient = new QueryClient();
@@ -30,54 +31,65 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <Toaster position="top-right" />
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Navigate to="/atvik\" replace />} />
-          
-          <Route
-            path="/atvik"
-            element={
-              <PrivateRoute>
-                <div className="container mx-auto px-4 py-8">
-                  <IncidentForm />
-                  <hr className="my-8" />
-                  <IncidentDashboard />
+        <div className="min-h-screen bg-gray-100">
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/*"
+              element={
+                <PrivateRoute>
+                  <Navigation />
+                  <Routes>
+                    <Route path="/" element={<Navigate to="/atvik" replace />} />
+                    <Route
+                      path="/atvik"
+                      element={
+                        <div className="container mx-auto px-4 py-8">
+                          <IncidentForm />
+                          <hr className="my-8" />
+                          <IncidentDashboard />
+                        </div>
+                      }
+                    />
+                    <Route
+                      path="/markmid"
+                      element={
+                        <div className="container mx-auto px-4 py-8">
+                          <GoalsDashboard />
+                          <hr className="my-8" />
+                          <GoalUpdateForm />
+                        </div>
+                      }
+                    />
+                    <Route
+                      path="/yfirlit"
+                      element={
+                        <PrivateRoute requireManager={true}>
+                          <ManagerDashboard />
+                        </PrivateRoute>
+                      }
+                    />
+                  </Routes>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/unauthorized"
+              element={
+                <div className="min-h-screen flex items-center justify-center">
+                  <div className="text-center">
+                    <h1 className="text-2xl font-bold text-gray-900">
+                      Unauthorized Access
+                    </h1>
+                    <p className="mt-2 text-gray-600">
+                      You don't have permission to access this page.
+                    </p>
+                  </div>
                 </div>
-              </PrivateRoute>
-            }
-          />
-          
-          <Route
-            path="/markmid"
-            element={
-              <PrivateRoute>
-                <div className="container mx-auto px-4 py-8">
-                  <GoalsDashboard />
-                  <hr className="my-8" />
-                  <GoalUpdateForm />
-                </div>
-              </PrivateRoute>
-            }
-          />
-          
-          <Route
-            path="/yfirlit"
-            element={
-              <PrivateRoute requireManager={true}>
-                <ManagerDashboard />
-              </PrivateRoute>
-            }
-          />
-
-          <Route path="/unauthorized" element={
-            <div className="min-h-screen flex items-center justify-center">
-              <div className="text-center">
-                <h1 className="text-2xl font-bold text-gray-900">Unauthorized Access</h1>
-                <p className="mt-2 text-gray-600">You don't have permission to access this page.</p>
-              </div>
-            </div>
-          } />
-        </Routes>
+              }
+            />
+          </Routes>
+        </div>
       </Router>
     </QueryClientProvider>
   );
