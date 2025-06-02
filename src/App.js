@@ -32,7 +32,7 @@ function App() {
         <Toaster position="top-right" />
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Navigate to="/atvik" replace />} />
+          <Route path="/" element={<Navigate to="/atvik\" replace />} />
           
           <Route
             path="/atvik"
