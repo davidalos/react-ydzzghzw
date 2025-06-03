@@ -28,7 +28,7 @@ export default function Login() {
       if (error) throw error;
 
       toast.success('Welcome back!');
-      navigate('/dashboard');
+      navigate('/atvik'); // Changed from /dashboard to /atvik
     } catch (error) {
       toast.error(error.message);
     } finally {
