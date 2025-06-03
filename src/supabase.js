@@ -1,35 +1,39 @@
+// src/supabase.js
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Hardcoded here for Codespaces simplicity (but .env is still preferred)
+const supabaseUrl = 'https://kybhregztorltmcltjra.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5YmhyZWd6dG9ybHRtY2x0anJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NzU0ODgsImV4cCI6MjA2NDQ1MTQ4OH0.7ws71LmUKGJiFRmyepo2eTlQJ1Of7x8vZbksxvrUNoU';
 
-if (!supabaseUrl || !supabaseKey) {
+// Fallback + error warning for environments like Vercel or Netlify
+if (!supabaseUrl || !supabaseAnonKey) {
   console.warn(
-    'Missing Supabase environment variables. Please connect to Supabase using the "Connect to Supabase" button in the top right corner.'
+    '[⚠️ Supabase] Missing credentials — check your .env file or hardcoded keys.'
   );
 }
 
-// Create Supabase client with environment-specific configuration
-export const supabase = createClient(supabaseUrl || '', supabaseKey || '', {
+// Initialize client with safe config
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
     detectSessionInUrl: true,
     autoRefreshToken: true,
     multiTab: true,
-    storageKey: 'supabase.auth.token',
-    storage: globalThis?.localStorage
+    storage: globalThis?.localStorage ?? window.localStorage,
+    storageKey: 'supabase.auth.token'
   }
 });
 
-// Initialize Supabase connection
-async function initSupabase() {
+// 🔄 Optional: Initialize a session check on app load
+export async function checkSupabaseSession() {
   try {
     const { data: { session }, error } = await supabase.auth.getSession();
     if (error) throw error;
-    console.log('Supabase initialized:', !!session);
-  } catch (error) {
-    console.error('Failed to initialize Supabase:', error.message);
+    console.log('[✅ Supabase] Connected — session active:', !!session);
+  } catch (err) {
+    console.error('[❌ Supabase] Failed to connect:', err.message);
   }
 }
 
-initSupabase();
+// Auto-run check
+checkSupabaseSession();
