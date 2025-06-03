@@ -10,6 +10,9 @@ if (!supabaseUrl || !supabaseKey) {
   );
 }
 
+// Create environment-specific storage key
+const storageKey = `sb.${import.meta.env.MODE}.auth.token`;
+
 // Create Supabase client with environment-specific configuration
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
@@ -17,13 +20,16 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
     detectSessionInUrl: false,
     autoRefreshToken: true,
     multiTab: true,
-    storageKey: `sb.${import.meta.env.MODE}.auth.token`, // Environment-specific storage key
+    storageKey,
     storage: window.localStorage
   },
   realtime: {
     params: {
       eventsPerSecond: 2
     }
+  },
+  db: {
+    schema: 'public'
   }
 });
 
