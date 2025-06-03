@@ -15,7 +15,9 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
     persistSession: true,
     detectSessionInUrl: true,
     autoRefreshToken: true,
-    multiTab: true
+    multiTab: true,
+    storageKey: 'app-storage-key', // Add a specific storage key
+    storage: window.localStorage // Explicitly set storage
   },
   global: {
     headers: {
@@ -29,11 +31,15 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
   }
 });
 
-// Test the connection
-supabase.auth.getSession().then(({ data: { session } }) => {
-  if (session) {
+// Initialize Supabase connection
+async function initSupabase() {
+  try {
+    const { error } = await supabase.from('user_profiles').select('count', { count: 'exact', head: true });
+    if (error) throw error;
     console.log('Successfully connected to Supabase');
+  } catch (error) {
+    console.error('Failed to connect to Supabase:', error.message);
   }
-}).catch(error => {
-  console.error('Failed to connect to Supabase:', error.message);
-});
+}
+
+initSupabase();

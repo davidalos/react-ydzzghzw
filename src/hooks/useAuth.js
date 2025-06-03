@@ -12,10 +12,13 @@ export function useAuth() {
 
     async function initialize() {
       try {
+        // Clear any stale error state
+        setError(null);
+
         // Get initial session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         if (sessionError) throw sessionError;
-        
+
         if (!mounted) return;
 
         if (session?.user) {
@@ -28,15 +31,25 @@ export function useAuth() {
 
           if (profileError) throw profileError;
           if (mounted) setProfile(profile);
+        } else {
+          // No session, clear user and profile
+          setUser(null);
+          setProfile(null);
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
-        if (mounted) setError(error.message);
+        if (mounted) {
+          setError(error.message);
+          // Clear user and profile on error
+          setUser(null);
+          setProfile(null);
+        }
       } finally {
         if (mounted) setLoading(false);
       }
     }
 
+    // Start initialization
     initialize();
 
     // Listen for auth changes
@@ -44,6 +57,9 @@ export function useAuth() {
       if (!mounted) return;
 
       try {
+        setLoading(true);
+        setError(null);
+
         if (session?.user) {
           setUser(session.user);
           const { data: profile, error: profileError } = await supabase
@@ -61,8 +77,10 @@ export function useAuth() {
       } catch (error) {
         console.error('Auth state change error:', error);
         setError(error.message);
+        setUser(null);
+        setProfile(null);
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     });
 
@@ -79,4 +97,4 @@ export function useAuth() {
     loading,
     error,
   };
-}
+};
