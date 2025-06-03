@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { supabase } from './supabase';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Turnstile } from '@cloudflare/turnstile-react';
+import { Turnstile } from 'react-turnstile';
 
 export default function Login() {
   const [email, setEmail] = useState('');
