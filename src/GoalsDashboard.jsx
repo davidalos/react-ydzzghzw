@@ -1,7 +1,10 @@
+// GoalsDashboard.jsx
+
 import React, { useEffect, useState } from 'react';
 import { supabase } from './supabase';
 import toast from 'react-hot-toast';
 import { useAuth } from './hooks/useAuth';
+import VoiceTextInput from './components/VoiceTextInput';
 
 export default function GoalsDashboard() {
   const [clients, setClients] = useState([]);
@@ -148,14 +151,12 @@ export default function GoalsDashboard() {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Description
             </label>
-            <textarea
-              placeholder="Goal description"
+            <VoiceTextInput
               value={newGoal.description}
               onChange={(e) =>
                 setNewGoal({ ...newGoal, description: e.target.value })
               }
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              rows="3"
+              placeholder="Goal description"
             />
           </div>
 
