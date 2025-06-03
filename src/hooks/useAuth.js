@@ -14,16 +14,13 @@ export function useAuth() {
     async function initialize() {
       try {
         setError(null);
-
-        // Get initial session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
         if (sessionError) throw sessionError;
-
         if (!mounted) return;
 
         if (session?.user) {
           setUser(session.user);
-          // Fetch user profile
           const { data: profile, error: profileError } = await supabase
             .from('user_profiles')
             .select('*')
@@ -33,19 +30,15 @@ export function useAuth() {
           if (profileError) {
             console.error('Profile fetch error:', profileError);
             await supabase.auth.signOut();
-            setUser(null);
-            setProfile(null);
+            if (mounted) {
+              setUser(null);
+              setProfile(null);
+            }
             return;
           }
 
           if (mounted) {
             setProfile(profile);
-          }
-        } else {
-          // No session, clear user and profile
-          if (mounted) {
-            setUser(null);
-            setProfile(null);
           }
         }
       } catch (error) {
@@ -60,10 +53,8 @@ export function useAuth() {
       }
     }
 
-    // Start initialization
     initialize();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
 

@@ -20,31 +20,18 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
-
-      // Fetch user profile to get role
-      const { data: profile, error: profileError } = await supabase
-        .from('user_profiles')
-        .select('role')
-        .eq('id', data.user.id)
-        .single();
-
-      if (profileError) {
-        throw new Error('Failed to load user profile');
-      }
+      if (signInError) throw signInError;
 
       toast.success('Welcome back!');
       navigate('/');
-      
     } catch (error) {
       console.error('Login error:', error);
       toast.error(error.message);
-      // Sign out if there was an error to ensure clean state
       await supabase.auth.signOut();
     } finally {
       setLoading(false);
