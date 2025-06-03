@@ -26,7 +26,18 @@ export default function SignUp() {
         password,
       });
 
-      if (signUpError) throw signUpError;
+      if (signUpError) {
+        // Check if the error is due to an existing user
+        if (signUpError.message === 'User already registered') {
+          toast('An account with this email already exists. Please sign in.', {
+            icon: '👋',
+            duration: 4000
+          });
+          navigate('/login');
+          return;
+        }
+        throw signUpError;
+      }
 
       if (user) {
         // Create user profile
