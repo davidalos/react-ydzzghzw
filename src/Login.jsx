@@ -32,20 +32,25 @@ export default function Login() {
         .from('user_profiles')
         .select('role')
         .eq('id', data.user.id)
-        .maybeSingle();
+        .single();
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        throw new Error('Failed to load user profile. Please try again.');
+      }
 
       toast.success('Welcome back!');
       
-      // Redirect based on role, default to employee view if no profile found
+      // Redirect based on role
       if (profile?.role === 'manager') {
         navigate('/yfirlit');
       } else {
         navigate('/atvik');
       }
     } catch (error) {
+      console.error('Login error:', error);
       toast.error(error.message);
+      // Sign out if there was an error to ensure clean state
+      await supabase.auth.signOut();
     } finally {
       setLoading(false);
     }
@@ -111,7 +116,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400"
               >
                 {loading ? 'Signing in...' : 'Sign in'}
               </button>

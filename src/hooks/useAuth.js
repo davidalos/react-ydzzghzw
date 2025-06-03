@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../supabase';
+import toast from 'react-hot-toast';
 
 export function useAuth() {
   const [user, setUser] = useState(null);
@@ -12,7 +13,6 @@ export function useAuth() {
 
     async function initialize() {
       try {
-        // Clear any stale error state
         setError(null);
 
         // Get initial session
@@ -23,29 +23,44 @@ export function useAuth() {
 
         if (session?.user) {
           setUser(session.user);
+          // Fetch user profile
           const { data: profile, error: profileError } = await supabase
             .from('user_profiles')
             .select('*')
             .eq('id', session.user.id)
-            .maybeSingle();
+            .single();
 
-          if (profileError) throw profileError;
-          if (mounted) setProfile(profile);
+          if (profileError) {
+            console.error('Profile fetch error:', profileError);
+            toast.error('Failed to load user profile');
+            // Clear session if profile fetch fails
+            await supabase.auth.signOut();
+            setUser(null);
+            setProfile(null);
+            return;
+          }
+
+          if (mounted) {
+            setProfile(profile);
+            setLoading(false);
+          }
         } else {
           // No session, clear user and profile
-          setUser(null);
-          setProfile(null);
+          if (mounted) {
+            setUser(null);
+            setProfile(null);
+            setLoading(false);
+          }
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
         if (mounted) {
           setError(error.message);
-          // Clear user and profile on error
           setUser(null);
           setProfile(null);
+          setLoading(false);
+          toast.error('Authentication error. Please try logging in again.');
         }
-      } finally {
-        if (mounted) setLoading(false);
       }
     }
 
@@ -66,9 +81,17 @@ export function useAuth() {
             .from('user_profiles')
             .select('*')
             .eq('id', session.user.id)
-            .maybeSingle();
+            .single();
 
-          if (profileError) throw profileError;
+          if (profileError) {
+            console.error('Profile fetch error:', profileError);
+            toast.error('Failed to load user profile');
+            await supabase.auth.signOut();
+            setUser(null);
+            setProfile(null);
+            return;
+          }
+
           setProfile(profile);
         } else {
           setUser(null);
@@ -79,6 +102,7 @@ export function useAuth() {
         setError(error.message);
         setUser(null);
         setProfile(null);
+        toast.error('Authentication error. Please try logging in again.');
       } finally {
         if (mounted) setLoading(false);
       }
@@ -97,4 +121,4 @@ export function useAuth() {
     loading,
     error,
   };
-};
+}
