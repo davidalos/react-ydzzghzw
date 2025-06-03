@@ -22,11 +22,25 @@ try {
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     persistSession: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
+    autoRefreshToken: true,
+    multiTab: true
   },
   global: {
     headers: {
       'X-Client-Info': 'supabase-js-web'
     }
+  },
+  db: {
+    schema: 'public'
   }
 });
+
+// Test the connection
+supabase.from('user_profiles').select('count', { count: 'exact', head: true })
+  .then(() => {
+    console.log('Successfully connected to Supabase');
+  })
+  .catch((error) => {
+    console.error('Failed to connect to Supabase:', error.message);
+  });
