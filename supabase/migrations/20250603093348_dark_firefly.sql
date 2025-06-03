@@ -1,16 +1,20 @@
 /*
-  # Initial Schema Setup
-
+  # Complete Schema Setup with Latest Policies
+  
   1. Tables
-    - user_profiles: Stores user information and roles
-    - clients: Stores client information
-    - incidents: Stores incident reports
-    - goals: Stores client goals
-    - goal_updates: Stores updates to goals
-
+    - user_profiles (with role management)
+    - clients
+    - incidents (with category management)
+    - goals (with status tracking)
+    - goal_updates (with progress tracking)
+    
   2. Security
     - RLS enabled on all tables
-    - Policies for authenticated access
+    - Latest policies for each table
+    - Improved role-based update policies
+    
+  3. Performance
+    - Indexes on frequently queried columns
 */
 
 -- Create user_profiles table
@@ -24,18 +28,44 @@ CREATE TABLE IF NOT EXISTS user_profiles (
 
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policy before recreating
+DROP POLICY IF EXISTS "Users can read own profile" ON public.user_profiles;
+
+-- Latest user profile policies
 CREATE POLICY "Users can read own profile"
   ON user_profiles
   FOR SELECT
   TO authenticated
   USING (auth.uid() = id);
 
-CREATE POLICY "Users can update own profile"
+CREATE POLICY "user_profile_self_update_v3"
   ON user_profiles
   FOR UPDATE
   TO authenticated
   USING (auth.uid() = id)
-  WITH CHECK (auth.uid() = id);
+  WITH CHECK (
+    auth.uid() = id AND
+    role = (SELECT role FROM user_profiles WHERE id = auth.uid())
+  );
+
+CREATE POLICY "manager_profile_update_v3"
+  ON user_profiles
+  FOR UPDATE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM user_profiles
+      WHERE id = auth.uid()
+      AND role = 'manager'
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM user_profiles
+      WHERE id = auth.uid()
+      AND role = 'manager'
+    )
+  );
 
 -- Create clients table
 CREATE TABLE IF NOT EXISTS clients (
