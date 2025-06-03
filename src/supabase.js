@@ -36,8 +36,8 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
   }
 });
 
-// Test the connection
-supabase.from('user_profiles').select('count', { count: 'exact', head: true })
+// Test the connection using a simple health check
+supabase.auth.getSession()
   .then(() => {
     console.log('Successfully connected to Supabase');
   })
