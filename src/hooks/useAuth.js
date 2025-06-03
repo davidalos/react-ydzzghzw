@@ -14,10 +14,12 @@ export function useAuth() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!mounted) return;
       
-      setUser(session?.user ?? null);
       if (session?.user) {
+        setUser(session.user);
         loadUserProfile(session.user.id);
       } else {
+        setUser(null);
+        setProfile(null);
         setLoading(false);
       }
     }).catch(err => {
@@ -31,10 +33,11 @@ export function useAuth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!mounted) return;
       
-      setUser(session?.user ?? null);
       if (session?.user) {
+        setUser(session.user);
         await loadUserProfile(session.user.id);
       } else {
+        setUser(null);
         setProfile(null);
         setLoading(false);
       }
@@ -55,15 +58,9 @@ export function useAuth() {
         .eq('id', userId)
         .maybeSingle();
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      if (!data) {
-        throw new Error('No profile found');
-      }
-
-      setProfile(data);
+      setProfile(data || null);
     } catch (error) {
       console.error('Error loading user profile:', error.message);
       setError(error.message);
