@@ -9,7 +9,17 @@ if (!supabaseUrl || !supabaseKey) {
   );
 }
 
-export const supabase = createClient(supabaseUrl || '', supabaseKey || '');
+// Create Supabase client with environment-specific configuration
+export const supabase = createClient(supabaseUrl || '', supabaseKey || '', {
+  auth: {
+    persistSession: true,
+    detectSessionInUrl: true,
+    autoRefreshToken: true,
+    multiTab: true,
+    storageKey: 'supabase.auth.token',
+    storage: globalThis?.localStorage
+  }
+});
 
 // Initialize Supabase connection
 async function initSupabase() {
