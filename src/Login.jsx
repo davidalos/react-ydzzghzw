@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from './supabase';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 export default function Login() {
@@ -108,12 +108,12 @@ export default function Login() {
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-white text-gray-500">
                   Don't have an account?{' '}
-                  <a
-                    href="/signup"
+                  <Link
+                    to="/signup"
                     className="font-medium text-indigo-600 hover:text-indigo-500"
                   >
                     Sign up
-                  </a>
+                  </Link>
                 </span>
               </div>
             </div>
