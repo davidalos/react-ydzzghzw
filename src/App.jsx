@@ -22,7 +22,7 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       </div>
     );
@@ -40,47 +40,49 @@ function App() {
               path="/*"
               element={
                 <PrivateRoute>
-                  <div className="min-h-screen bg-gray-100">
+                  <>
                     <Navigation />
-                    <Routes>
-                      <Route path="/\" element={<Navigate to="/atvik\" replace />} />
-                      <Route
-                        path="/atvik"
-                        element={
-                          <div className="container mx-auto px-4 py-8">
-                            <IncidentForm />
-                            <hr className="my-8" />
-                            <IncidentDashboard />
-                          </div>
-                        }
-                      />
-                      <Route
-                        path="/markmid"
-                        element={
-                          <div className="container mx-auto px-4 py-8">
-                            <GoalsDashboard />
-                            <hr className="my-8" />
-                            <GoalUpdateForm />
-                          </div>
-                        }
-                      />
-                      <Route
-                        path="/yfirlit"
-                        element={
-                          <PrivateRoute requireManager={true}>
-                            <ManagerDashboard />
-                          </PrivateRoute>
-                        }
-                      />
-                    </Routes>
-                  </div>
+                    <div className="container mx-auto px-4 py-8">
+                      <Routes>
+                        <Route path="/" element={<Navigate to="/atvik" replace />} />
+                        <Route
+                          path="/atvik"
+                          element={
+                            <>
+                              <IncidentForm />
+                              <hr className="my-8" />
+                              <IncidentDashboard />
+                            </>
+                          }
+                        />
+                        <Route
+                          path="/markmid"
+                          element={
+                            <>
+                              <GoalsDashboard />
+                              <hr className="my-8" />
+                              <GoalUpdateForm />
+                            </>
+                          }
+                        />
+                        <Route
+                          path="/yfirlit"
+                          element={
+                            <PrivateRoute requireManager={true}>
+                              <ManagerDashboard />
+                            </PrivateRoute>
+                          }
+                        />
+                      </Routes>
+                    </div>
+                  </>
                 </PrivateRoute>
               }
             />
             <Route
               path="/unauthorized"
               element={
-                <div className="min-h-screen flex items-center justify-center">
+                <div className="min-h-screen flex items-center justify-center bg-gray-50">
                   <div className="text-center">
                     <h1 className="text-2xl font-bold text-gray-900">
                       Unauthorized Access
