@@ -21,10 +21,10 @@ export function Navigation() {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <Link to="/">
+              <Link to="/" className="block">
                 <img
-                  className="h-8 w-auto"
-                  src="/og.png"
+                  className="h-12 w-auto"
+                  src="https://images.pexels.com/photos/1148820/pexels-photo-1148820.jpeg?auto=compress&cs=tinysrgb&w=256"
                   alt="Kópavogsbær"
                 />
               </Link>
