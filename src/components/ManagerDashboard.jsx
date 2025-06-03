@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from 'react-query';
 import { supabase } from '../supabase';
 import { format } from 'date-fns';
@@ -14,20 +14,39 @@ import {
   PieChart,
   Pie,
   Cell,
+  LineChart,
+  Line,
 } from 'recharts';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
 export function ManagerDashboard() {
-  const { data: incidents } = useQuery('incidents', async () => {
-    const { data, error } = await supabase
+  const [timeRange, setTimeRange] = useState('month');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+
+  const { data: incidents } = useQuery(['incidents', timeRange, selectedCategory], async () => {
+    let query = supabase
       .from('incidents')
       .select(`
         *,
         user_profiles!incidents_submitted_by_fkey(full_name)
       `)
       .order('created_at', { ascending: false });
-    
+
+    // Apply time range filter
+    const now = new Date();
+    if (timeRange === 'week') {
+      query = query.gte('created_at', new Date(now.setDate(now.getDate() - 7)).toISOString());
+    } else if (timeRange === 'month') {
+      query = query.gte('created_at', new Date(now.setMonth(now.getMonth() - 1)).toISOString());
+    }
+
+    // Apply category filter
+    if (selectedCategory !== 'all') {
+      query = query.eq('category', selectedCategory);
+    }
+
+    const { data, error } = await query;
     if (error) throw error;
     return data;
   });
@@ -37,7 +56,7 @@ export function ManagerDashboard() {
       .from('goals')
       .select(`
         *,
-        goal_updates(progress_type)
+        goal_updates(progress_type, created_at)
       `);
     
     if (error) throw error;
@@ -53,6 +72,18 @@ export function ManagerDashboard() {
   const incidentChartData = Object.entries(incidentsByCategory || {}).map(([name, value]) => ({
     name,
     value,
+  }));
+
+  // Calculate incident trends over time
+  const incidentTrends = incidents?.reduce((acc, incident) => {
+    const date = format(new Date(incident.created_at), 'yyyy-MM-dd');
+    acc[date] = (acc[date] || 0) + 1;
+    return acc;
+  }, {});
+
+  const trendData = Object.entries(incidentTrends || {}).map(([date, count]) => ({
+    date,
+    count,
   }));
 
   // Calculate goal progress statistics
@@ -71,13 +102,40 @@ export function ManagerDashboard() {
   });
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Manager Dashboard</h1>
+    <div className="p-4 md:p-6">
+      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
+        <h1 className="text-2xl font-bold mb-4 md:mb-0">Yfirlit stjórnanda</h1>
+        
+        <div className="flex flex-col md:flex-row gap-4">
+          <select
+            value={timeRange}
+            onChange={(e) => setTimeRange(e.target.value)}
+            className="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          >
+            <option value="week">Síðasta vika</option>
+            <option value="month">Síðasti mánuður</option>
+            <option value="all">Allt tímabil</option>
+          </select>
+
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          >
+            <option value="all">Allir flokkar</option>
+            <option value="Positive Progress">Jákvæð þróun</option>
+            <option value="Medical">Læknisfræðilegt</option>
+            <option value="Behavioral">Hegðun</option>
+            <option value="Safety">Öryggi</option>
+            <option value="Emergency">Neyðartilvik</option>
+          </select>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Incident Distribution */}
         <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-4">Incident Distribution</h2>
+          <h2 className="text-lg font-semibold mb-4">Dreifing atvika</h2>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -101,9 +159,25 @@ export function ManagerDashboard() {
           </div>
         </div>
 
+        {/* Incident Trends */}
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-lg font-semibold mb-4">Þróun atvika yfir tíma</h2>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={trendData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Line type="monotone" dataKey="count" stroke="#8884d8" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
         {/* Goal Progress */}
         <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-4">Goal Progress</h2>
+          <h2 className="text-lg font-semibold mb-4">Framvinda markmiða</h2>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={goalProgress}>
@@ -112,32 +186,32 @@ export function ManagerDashboard() {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="improvement" fill="#4caf50" name="Improvement" />
-                <Bar dataKey="setback" fill="#f44336" name="Setback" />
-                <Bar dataKey="neutral" fill="#9e9e9e" name="Neutral" />
+                <Bar dataKey="improvement" fill="#4caf50" name="Bati" />
+                <Bar dataKey="setback" fill="#f44336" name="Bakslag" />
+                <Bar dataKey="neutral" fill="#9e9e9e" name="Hlutlaust" />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Recent Incidents */}
+        {/* Recent Incidents Table */}
         <div className="bg-white p-6 rounded-lg shadow md:col-span-2">
-          <h2 className="text-lg font-semibold mb-4">Recent Incidents</h2>
+          <h2 className="text-lg font-semibold mb-4">Nýleg atvik</h2>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead>
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
+                    Dagsetning
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Category
+                    Flokkur
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Submitted By
+                    Skráð af
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Description
+                    Lýsing
                   </th>
                 </tr>
               </thead>
@@ -145,7 +219,7 @@ export function ManagerDashboard() {
                 {incidents?.slice(0, 5).map((incident) => (
                   <tr key={incident.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {format(new Date(incident.created_at), 'PPP')}
+                      {format(new Date(incident.created_at), 'dd.MM.yyyy')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {incident.category}
