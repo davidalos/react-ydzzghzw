@@ -32,8 +32,6 @@ export function useAuth() {
 
           if (profileError) {
             console.error('Profile fetch error:', profileError);
-            toast.error('Failed to load user profile');
-            // Clear session if profile fetch fails
             await supabase.auth.signOut();
             setUser(null);
             setProfile(null);
@@ -42,14 +40,12 @@ export function useAuth() {
 
           if (mounted) {
             setProfile(profile);
-            setLoading(false);
           }
         } else {
           // No session, clear user and profile
           if (mounted) {
             setUser(null);
             setProfile(null);
-            setLoading(false);
           }
         }
       } catch (error) {
@@ -58,9 +54,9 @@ export function useAuth() {
           setError(error.message);
           setUser(null);
           setProfile(null);
-          setLoading(false);
-          toast.error('Authentication error. Please try logging in again.');
         }
+      } finally {
+        if (mounted) setLoading(false);
       }
     }
 
@@ -85,7 +81,6 @@ export function useAuth() {
 
           if (profileError) {
             console.error('Profile fetch error:', profileError);
-            toast.error('Failed to load user profile');
             await supabase.auth.signOut();
             setUser(null);
             setProfile(null);
@@ -102,7 +97,6 @@ export function useAuth() {
         setError(error.message);
         setUser(null);
         setProfile(null);
-        toast.error('Authentication error. Please try logging in again.');
       } finally {
         if (mounted) setLoading(false);
       }

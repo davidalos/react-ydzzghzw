@@ -35,17 +35,12 @@ export default function Login() {
         .single();
 
       if (profileError) {
-        throw new Error('Failed to load user profile. Please try again.');
+        throw new Error('Failed to load user profile');
       }
 
       toast.success('Welcome back!');
+      navigate('/');
       
-      // Redirect based on role
-      if (profile?.role === 'manager') {
-        navigate('/yfirlit');
-      } else {
-        navigate('/atvik');
-      }
     } catch (error) {
       console.error('Login error:', error);
       toast.error(error.message);
