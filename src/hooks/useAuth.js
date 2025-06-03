@@ -13,7 +13,8 @@ export function useAuth() {
     async function initialize() {
       try {
         // Get initial session
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) throw sessionError;
         
         if (!mounted) return;
 
