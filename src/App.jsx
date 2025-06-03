@@ -44,7 +44,7 @@ function App() {
                     <Navigation />
                     <div className="container mx-auto px-4 py-8">
                       <Routes>
-                        <Route path="/" element={<Navigate to="/atvik" replace />} />
+                        <Route path="/\" element={<Navigate to="/atvik\" replace />} />
                         <Route
                           path="/atvik"
                           element={
