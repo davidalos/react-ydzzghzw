@@ -1,9 +1,10 @@
-// src/supabase.js
 import { createClient } from '@supabase/supabase-js';
 
-// TEMP hardcoded for StackBlitz
-const supabaseUrl = 'https://kybhregztorltmcltjra.supabase.co';
-const supabaseKey =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5YmhyZWd6dG9ybHRtY2x0anJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NzU0ODgsImV4cCI6MjA2NDQ1MTQ4OH0.7ws71LmUKGJiFRmyepo2eTlQJ1Of7x8vZbksxvrUNoU';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error('Missing Supabase environment variables. Please connect to Supabase using the "Connect to Supabase" button.');
+}
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
