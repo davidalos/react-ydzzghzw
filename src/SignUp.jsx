@@ -7,6 +7,7 @@ export default function SignUp() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [role, setRole] = useState('employee');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -27,7 +28,6 @@ export default function SignUp() {
       });
 
       if (signUpError) {
-        // Check if the error is due to an existing user
         if (signUpError.message === 'User already registered') {
           toast('An account with this email already exists. Please sign in.', {
             icon: '👋',
@@ -40,14 +40,14 @@ export default function SignUp() {
       }
 
       if (user) {
-        // Create user profile
+        // Create user profile with selected role
         const { error: profileError } = await supabase
           .from('user_profiles')
           .insert([
             {
               id: user.id,
               full_name: fullName,
-              role: 'employee' // Default role
+              role: role // Use selected role
             }
           ]);
 
@@ -111,6 +111,24 @@ export default function SignUp() {
                   onChange={(e) => setFullName(e.target.value)}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+                Role
+              </label>
+              <div className="mt-1">
+                <select
+                  id="role"
+                  name="role"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                >
+                  <option value="employee">Employee</option>
+                  <option value="manager">Manager</option>
+                </select>
               </div>
             </div>
 
