@@ -19,14 +19,11 @@ export function Navigation() {
     <nav className="bg-indigo-600">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
+          {/* Logo + Links */}
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <Link to="/" className="block">
-                <img
-                  className="h-12 w-auto"
-                  src="/og.png"
-                  alt="Kópavogsbær"
-                />
+                <img className="h-12 w-auto" src="/og.png" alt="Kópavogsbær" />
               </Link>
             </div>
             <div className="hidden md:block">
@@ -54,15 +51,25 @@ export function Navigation() {
               </div>
             </div>
           </div>
+
+          {/* Right Side: User Info + Settings + Logout */}
           <div className="hidden md:block">
-            <div className="ml-4 flex items-center md:ml-6">
-              <span className="text-white mr-4">{profile?.full_name}</span>
+            <div className="ml-4 flex items-center space-x-4 md:ml-6">
+              <div className="flex flex-col items-end text-white text-sm">
+                <span>{profile?.full_name}</span>
+                <span className="text-xs opacity-75">
+                  {isManager ? '🧑‍💼 Manager' : '👷 Staff'}
+                </span>
+              </div>
+
               <button
                 onClick={() => setIsSettingsOpen(true)}
-                className="text-white hover:bg-indigo-500 p-2 rounded-md"
+                className="text-white hover:bg-indigo-500 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white"
+                title="Settings"
               >
                 <Cog6ToothIcon className="h-6 w-6" />
               </button>
+
               <button
                 onClick={handleLogout}
                 className="text-white hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium"
@@ -74,6 +81,7 @@ export function Navigation() {
         </div>
       </div>
 
+      {/* Settings Modal */}
       <Settings isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </nav>
   );

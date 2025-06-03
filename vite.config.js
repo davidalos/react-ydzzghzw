@@ -1,30 +1,9 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import { resolve } from 'path';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  server: {
-    port: 3000,
-    host: '0.0.0.0',
-    hmr: {
-      clientPort: 443,
-    }
-  },
-  preview: {
-    port: 3000,
-    host: '0.0.0.0',
-  },
   build: {
-    outDir: 'dist',
-    rollupOptions: {
-      input: {
-        main: resolve(__dirname, 'index.html')
-      }
-    }
-  },
-  define: {
-    'process.env': {},
-    global: 'globalThis'
+    chunkSizeWarningLimit: 1000 // Suppress 500kB warning if needed
   }
-});
+})

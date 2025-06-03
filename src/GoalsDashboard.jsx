@@ -12,6 +12,8 @@ export default function GoalsDashboard() {
     description: '',
   });
   const [loading, setLoading] = useState(false);
+  const [errorState, setErrorState] = useState(false);
+  const [goalLoading, setGoalLoading] = useState(true);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -24,24 +26,32 @@ export default function GoalsDashboard() {
       .from('clients')
       .select('*')
       .order('label', { ascending: true });
+
     if (error) {
-      toast.error('Failed to load clients');
-      console.error('Error:', error);
+      console.error('🧨 Clients Load Error:', error.message || error);
+      setErrorState(true);
     } else {
-      setClients(data);
+      setClients(data || []);
+      setErrorState(false);
     }
   }
 
   async function loadGoals() {
-    const { data, error } = await supabase
-      .from('goals')
-      .select('*, clients(label)')
-      .order('created_at', { ascending: false });
-    if (error) {
-      toast.error('Failed to load goals');
-      console.error('Error:', error);
-    } else {
-      setGoals(data);
+    setGoalLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('goals')
+        .select('*, clients(label)')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setGoals(data || []);
+      setErrorState(false);
+    } catch (error) {
+      console.error('🧨 Goals Load Error:', error.message || error);
+      setErrorState(true);
+    } finally {
+      setGoalLoading(false);
     }
   }
 
@@ -50,14 +60,14 @@ export default function GoalsDashboard() {
     setLoading(true);
 
     try {
-      if (!newGoal.client_id || !newGoal.title) {
+      if (!newGoal.client_id.trim() || !newGoal.title.trim()) {
         throw new Error('Please fill in all required fields');
       }
 
       const { error } = await supabase.from('goals').insert({
         client_id: newGoal.client_id,
-        title: newGoal.title,
-        description: newGoal.description,
+        title: newGoal.title.trim(),
+        description: newGoal.description.trim(),
         created_by: user.id,
       });
 
@@ -68,7 +78,7 @@ export default function GoalsDashboard() {
       loadGoals();
     } catch (error) {
       toast.error(error.message);
-      console.error('Error:', error);
+      console.error('Create Goal Error:', error);
     } finally {
       setLoading(false);
     }
@@ -88,15 +98,15 @@ export default function GoalsDashboard() {
       loadGoals();
     } catch (error) {
       toast.error('Failed to update goal status');
-      console.error('Error:', error);
+      console.error('Update Goal Error:', error);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+    <div className="max-w-4xl mx-auto p-4 space-y-8">
+      <div className="bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-2xl font-bold mb-6">Create New Goal</h2>
         <form onSubmit={handleCreateGoal} className="space-y-4">
           <div>
@@ -161,53 +171,68 @@ export default function GoalsDashboard() {
 
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-2xl font-bold mb-6">Active Goals</h2>
-        <div className="space-y-4">
-          {goals.map((goal) => (
-            <div
-              key={goal.id}
-              className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-            >
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="text-lg font-semibold">{goal.title}</h3>
-                  <p className="text-sm text-gray-500">
-                    Client: {goal.clients?.label}
-                  </p>
+
+        {goalLoading ? (
+          <div className="text-center text-gray-500 py-4">Loading goals…</div>
+        ) : errorState ? (
+          <div className="text-center text-red-600 py-4">
+            ⚠️ Could not load goals. Try again later.
+          </div>
+        ) : goals.length === 0 ? (
+          <div className="text-center text-gray-500 py-4">
+            No goals have been created yet.
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {goals.map((goal) => (
+              <div
+                key={goal.id}
+                className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+              >
+                <div className="flex justify-between items-start flex-wrap gap-2">
+                  <div>
+                    <h3 className="text-lg font-semibold">{goal.title}</h3>
+                    <p className="text-sm text-gray-500">
+                      Client: {goal.clients?.label}
+                    </p>
+                  </div>
+                  <span
+                    className={`px-2 py-1 text-sm rounded-full ${
+                      goal.status === 'active'
+                        ? 'bg-green-100 text-green-800'
+                        : goal.status === 'completed'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}
+                  >
+                    {goal.status}
+                  </span>
                 </div>
-                <span
-                  className={`px-2 py-1 text-sm rounded-full ${
-                    goal.status === 'active'
-                      ? 'bg-green-100 text-green-800'
-                      : goal.status === 'completed'
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}
-                >
-                  {goal.status}
-                </span>
+                {goal.description && (
+                  <p className="mt-2 text-gray-600 whitespace-pre-wrap">
+                    {goal.description}
+                  </p>
+                )}
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button
+                    onClick={() => changeGoalStatus(goal.id, 'completed')}
+                    disabled={loading}
+                    className="text-sm px-3 py-1 rounded bg-green-50 text-green-700 hover:bg-green-100"
+                  >
+                    Mark Complete
+                  </button>
+                  <button
+                    onClick={() => changeGoalStatus(goal.id, 'archived')}
+                    disabled={loading}
+                    className="text-sm px-3 py-1 rounded bg-gray-50 text-gray-700 hover:bg-gray-100"
+                  >
+                    Archive
+                  </button>
+                </div>
               </div>
-              {goal.description && (
-                <p className="mt-2 text-gray-600">{goal.description}</p>
-              )}
-              <div className="mt-4 flex gap-2">
-                <button
-                  onClick={() => changeGoalStatus(goal.id, 'completed')}
-                  disabled={loading}
-                  className="text-sm px-3 py-1 rounded bg-green-50 text-green-700 hover:bg-green-100"
-                >
-                  Mark Complete
-                </button>
-                <button
-                  onClick={() => changeGoalStatus(goal.id, 'archived')}
-                  disabled={loading}
-                  className="text-sm px-3 py-1 rounded bg-gray-50 text-gray-700 hover:bg-gray-100"
-                >
-                  Archive
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

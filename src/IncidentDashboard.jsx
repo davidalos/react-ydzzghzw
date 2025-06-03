@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 export default function IncidentDashboard() {
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [errorState, setErrorState] = useState(false);
 
   useEffect(() => {
     loadIncidents();
@@ -23,10 +24,12 @@ export default function IncidentDashboard() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setIncidents(data);
+
+      setIncidents(data || []);
+      setErrorState(false);
     } catch (error) {
-      toast.error('Failed to load incidents');
-      console.error('Error:', error);
+      console.error('🧨 Incident Load Error:', error.message || error);
+      setErrorState(true);
     } finally {
       setLoading(false);
     }
@@ -34,62 +37,46 @@ export default function IncidentDashboard() {
 
   if (loading) {
     return (
-      <div className="text-center py-4">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+      <div className="text-center py-6">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto border-gray-900" />
+        <p className="mt-2 text-gray-600 text-sm">Loading incidents…</p>
+      </div>
+    );
+  }
+
+  if (errorState) {
+    return (
+      <div className="text-center text-red-600 py-6">
+        <p>⚠️ Could not load incidents. Try again later.</p>
+      </div>
+    );
+  }
+
+  if (incidents.length === 0) {
+    return (
+      <div className="text-center py-6 text-gray-500">
+        <p>No incidents recorded yet.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
-      <h2 className="text-2xl font-bold mb-6">Recent Incidents</h2>
-      <div className="space-y-4">
+    <div className="p-4 max-w-3xl mx-auto">
+      <h2 className="text-xl font-semibold mb-4">All Incidents</h2>
+      <ul className="space-y-4">
         {incidents.map((incident) => (
-          <div
-            key={incident.id}
-            className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <span
-                  className={`inline-block px-2 py-1 text-sm rounded-full ${
-                    incident.category === 'Emergency'
-                      ? 'bg-red-100 text-red-800'
-                      : incident.category === 'Safety'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : incident.category === 'Medical'
-                      ? 'bg-blue-100 text-blue-800'
-                      : incident.category === 'Behavioral'
-                      ? 'bg-purple-100 text-purple-800'
-                      : 'bg-green-100 text-green-800'
-                  }`}
-                >
-                  {incident.category}
-                </span>
-                <p className="mt-2 text-sm text-gray-500">
-                  Client: {incident.clients?.label}
-                </p>
-              </div>
-              <p className="text-sm text-gray-500">
-                {format(new Date(incident.created_at), 'PPp')}
-              </p>
-            </div>
-            <p className="mt-2">{incident.description}</p>
-            {incident.reflection && (
-              <p className="mt-2 text-gray-600 italic">{incident.reflection}</p>
-            )}
-            <div className="mt-2 text-sm text-gray-500">
-              Reported by: {incident.user_profiles?.full_name}
-              {incident.co_staff?.length > 0 && (
-                <span>
-                  {' '}
-                  | Co-staff: {incident.co_staff.join(', ')}
-                </span>
-              )}
-            </div>
-          </div>
+          <li key={incident.id} className="p-4 border rounded-xl shadow-sm bg-white">
+            <p className="text-sm text-gray-600 mb-1">
+              {format(new Date(incident.created_at), 'PPpp')}
+            </p>
+            <p className="text-md font-medium mb-1">{incident.clients?.label}</p>
+            <p className="text-gray-800 whitespace-pre-wrap">{incident.description}</p>
+            <p className="text-xs text-gray-400 mt-2">
+              Submitted by: {incident.user_profiles?.full_name || 'Unknown'}
+            </p>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }
