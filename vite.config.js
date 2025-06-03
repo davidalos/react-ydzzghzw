@@ -11,8 +11,12 @@ export default defineConfig({
       clientPort: 443,
     }
   },
+  preview: {
+    port: 3000,
+    host: '0.0.0.0',
+  },
   build: {
-    outDir: 'build',
+    outDir: 'dist',
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html')
