@@ -27,8 +27,23 @@ export default function Login() {
 
       if (error) throw error;
 
+      // Fetch user profile to get role
+      const { data: profile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
       toast.success('Welcome back!');
-      navigate('/atvik'); // Changed from /dashboard to /atvik
+      
+      // Redirect based on role
+      if (profile.role === 'manager') {
+        navigate('/yfirlit');
+      } else {
+        navigate('/atvik');
+      }
     } catch (error) {
       toast.error(error.message);
     } finally {
