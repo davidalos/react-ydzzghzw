@@ -12,6 +12,7 @@ export default defineConfig({
     }
   },
   build: {
+    outDir: 'build',
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html')
