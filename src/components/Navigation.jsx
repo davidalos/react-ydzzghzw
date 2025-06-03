@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../supabase';
+import { Settings } from './Settings';
+import { Cog6ToothIcon } from '@heroicons/react/24/outline';
 
 export function Navigation() {
   const { profile, isManager } = useAuth();
   const navigate = useNavigate();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -53,6 +56,12 @@ export function Navigation() {
             <div className="ml-4 flex items-center md:ml-6">
               <span className="text-white mr-4">{profile?.full_name}</span>
               <button
+                onClick={() => setIsSettingsOpen(true)}
+                className="text-white hover:bg-indigo-500 p-2 rounded-md"
+              >
+                <Cog6ToothIcon className="h-6 w-6" />
+              </button>
+              <button
                 onClick={handleLogout}
                 className="text-white hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium"
               >
@@ -62,6 +71,8 @@ export function Navigation() {
           </div>
         </div>
       </div>
+
+      <Settings isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </nav>
   );
 }
