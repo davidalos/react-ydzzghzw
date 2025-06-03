@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 
 import Login from './Login.jsx';
 import SignUp from './SignUp.jsx';
+import Home from './Home.jsx';
 import IncidentForm from './IncidentForm.jsx';
 import IncidentDashboard from './IncidentDashboard.jsx';
 import GoalsDashboard from './GoalsDashboard.jsx';
@@ -44,7 +45,7 @@ function App() {
                     <Navigation />
                     <div className="container mx-auto px-4 py-8">
                       <Routes>
-                        <Route path="/\" element={<Navigate to="/atvik\" replace />} />
+                        <Route path="/" element={<Home />} />
                         <Route
                           path="/atvik"
                           element={
