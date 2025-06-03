@@ -24,7 +24,7 @@ export function Navigation() {
               <Link to="/" className="block">
                 <img
                   className="h-12 w-auto"
-                  src="/og copy.png"
+                  src="https://images.pexels.com/photos/1148820/pexels-photo-1148820.jpeg?auto=compress&cs=tinysrgb&w=256"
                   alt="Kópavogsbær"
                 />
               </Link>
