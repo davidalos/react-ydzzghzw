@@ -25,6 +25,7 @@ export function useAuth() {
             .from('user_profiles')
             .select('*')
             .eq('id', session.user.id)
+            .limit(1)
             .single();
 
           if (profileError) {
@@ -69,6 +70,7 @@ export function useAuth() {
             .from('user_profiles')
             .select('*')
             .eq('id', session.user.id)
+            .limit(1)
             .single();
 
           if (profileError) {
