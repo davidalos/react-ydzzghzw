@@ -21,7 +21,7 @@ export function PrivateRoute({ children, requireManager = false }) {
   }
 
   if (requireManager && !isManager) {
-    return <Navigate to="/unauthorized" state={{ from: location }} replace />;
+    return <Navigate to="/unauthorized\" state={{ from: location }} replace />;
   }
 
   return children;
