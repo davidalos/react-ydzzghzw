@@ -11,6 +11,13 @@ export default function Login() {
 
   async function handleLogin(e) {
     e.preventDefault();
+    
+    // Add password length validation
+    if (password.length < 6) {
+      toast.error('Password must be at least 6 characters long');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -75,11 +82,15 @@ export default function Login() {
                   type="password"
                   autoComplete="current-password"
                   required
+                  minLength={6}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 />
               </div>
+              <p className="mt-1 text-sm text-gray-500">
+                Password must be at least 6 characters long
+              </p>
             </div>
 
             <div>
