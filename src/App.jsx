@@ -43,7 +43,7 @@ function App() {
                   <div className="min-h-screen bg-gray-100">
                     <Navigation />
                     <Routes>
-                      <Route path="/" element={<Navigate to="/atvik" replace />} />
+                      <Route path="/\" element={<Navigate to="/atvik\" replace />} />
                       <Route
                         path="/atvik"
                         element={
