@@ -44,7 +44,7 @@ function App() {
                     <Navigation />
                     <div className="container mx-auto px-4 py-8">
                       <Routes>
-                        <Route path="/\" element={<Navigate to="/atvik\" replace />} />
+                        <Route path="/" element={<Navigate to="/atvik" replace />} />
                         <Route
                           path="/atvik"
                           element={
@@ -62,13 +62,15 @@ function App() {
                               <GoalsDashboard />
                               <hr className="my-8" />
                               <GoalUpdateForm />
+                              <hr className="my-8" />
+                              <GoalProgressChart />
                             </>
                           }
                         />
                         <Route
                           path="/yfirlit"
                           element={
-                            <PrivateRoute requireManager={true}>
+                            <PrivateRoute requireManager>
                               <ManagerDashboard />
                             </PrivateRoute>
                           }
@@ -77,21 +79,6 @@ function App() {
                     </div>
                   </>
                 </PrivateRoute>
-              }
-            />
-            <Route
-              path="/unauthorized"
-              element={
-                <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                  <div className="text-center">
-                    <h1 className="text-2xl font-bold text-gray-900">
-                      Unauthorized Access
-                    </h1>
-                    <p className="mt-2 text-gray-600">
-                      You don't have permission to access this page.
-                    </p>
-                  </div>
-                </div>
               }
             />
           </Routes>

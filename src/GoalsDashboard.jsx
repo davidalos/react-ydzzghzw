@@ -1,9 +1,9 @@
-// src/GoalsDashboard.js
-
 import React, { useEffect, useState } from 'react';
 import { supabase } from './supabase';
+import toast from 'react-hot-toast';
+import { useAuth } from './hooks/useAuth';
 
-export default function GoalsDashboard({ user }) {
+export default function GoalsDashboard() {
   const [clients, setClients] = useState([]);
   const [goals, setGoals] = useState([]);
   const [newGoal, setNewGoal] = useState({
@@ -11,7 +11,7 @@ export default function GoalsDashboard({ user }) {
     title: '',
     description: '',
   });
-  const [statusMsg, setStatusMsg] = useState('');
+  const { user } = useAuth();
 
   useEffect(() => {
     loadClients();
@@ -19,20 +19,33 @@ export default function GoalsDashboard({ user }) {
   }, []);
 
   async function loadClients() {
-    const { data } = await supabase.from('clients').select('*');
-    setClients(data);
+    const { data, error } = await supabase.from('clients').select('*');
+    if (error) {
+      toast.error('Failed to load clients');
+    } else {
+      setClients(data);
+    }
   }
 
   async function loadGoals() {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('goals')
-      .select('*')
+      .select('*, clients(label)')
       .order('created_at', { ascending: false });
-    setGoals(data);
+    if (error) {
+      toast.error('Failed to load goals');
+    } else {
+      setGoals(data);
+    }
   }
 
   async function handleCreateGoal(e) {
     e.preventDefault();
+    if (!newGoal.client_id || !newGoal.title) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
     const { error } = await supabase.from('goals').insert({
       client_id: newGoal.client_id,
       title: newGoal.title,
@@ -41,75 +54,140 @@ export default function GoalsDashboard({ user }) {
     });
 
     if (error) {
-      setStatusMsg('Villa við að skrá markmið: ' + error.message);
+      toast.error('Failed to create goal');
     } else {
-      setStatusMsg('Markmið skráð.');
+      toast.success('Goal created successfully');
       setNewGoal({ client_id: '', title: '', description: '' });
       loadGoals();
     }
   }
 
   async function changeGoalStatus(goalId, newStatus) {
-    await supabase.from('goals').update({ status: newStatus }).eq('id', goalId);
-    loadGoals();
+    const { error } = await supabase
+      .from('goals')
+      .update({ status: newStatus })
+      .eq('id', goalId);
+
+    if (error) {
+      toast.error('Failed to update goal status');
+    } else {
+      toast.success('Goal status updated');
+      loadGoals();
+    }
   }
 
   return (
-    <div>
-      <h2>Markmið fyrir Íbúa</h2>
+    <div className="max-w-4xl mx-auto">
+      <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <h2 className="text-2xl font-bold mb-6">Create New Goal</h2>
+        <form onSubmit={handleCreateGoal} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Client *
+            </label>
+            <select
+              value={newGoal.client_id}
+              onChange={(e) =>
+                setNewGoal({ ...newGoal, client_id: e.target.value })
+              }
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              required
+            >
+              <option value="">Select client</option>
+              {clients.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
-      <form onSubmit={handleCreateGoal}>
-        <h4>Nýtt markmið</h4>
-        <select
-          value={newGoal.client_id}
-          onChange={(e) =>
-            setNewGoal({ ...newGoal, client_id: e.target.value })
-          }
-        >
-          <option value="">Veldu íbúa</option>
-          {clients.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.label}
-            </option>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Title *
+            </label>
+            <input
+              type="text"
+              placeholder="Goal title"
+              value={newGoal.title}
+              onChange={(e) => setNewGoal({ ...newGoal, title: e.target.value })}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Description
+            </label>
+            <textarea
+              placeholder="Goal description"
+              value={newGoal.description}
+              onChange={(e) =>
+                setNewGoal({ ...newGoal, description: e.target.value })
+              }
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              rows="3"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          >
+            Create Goal
+          </button>
+        </form>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <h2 className="text-2xl font-bold mb-6">Active Goals</h2>
+        <div className="space-y-4">
+          {goals.map((goal) => (
+            <div
+              key={goal.id}
+              className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-lg font-semibold">{goal.title}</h3>
+                  <p className="text-sm text-gray-500">
+                    Client: {goal.clients?.label}
+                  </p>
+                </div>
+                <span
+                  className={`px-2 py-1 text-sm rounded-full ${
+                    goal.status === 'active'
+                      ? 'bg-green-100 text-green-800'
+                      : goal.status === 'completed'
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'bg-gray-100 text-gray-800'
+                  }`}
+                >
+                  {goal.status}
+                </span>
+              </div>
+              {goal.description && (
+                <p className="mt-2 text-gray-600">{goal.description}</p>
+              )}
+              <div className="mt-4 flex gap-2">
+                <button
+                  onClick={() => changeGoalStatus(goal.id, 'completed')}
+                  className="text-sm px-3 py-1 rounded bg-green-50 text-green-700 hover:bg-green-100"
+                >
+                  Mark Complete
+                </button>
+                <button
+                  onClick={() => changeGoalStatus(goal.id, 'archived')}
+                  className="text-sm px-3 py-1 rounded bg-gray-50 text-gray-700 hover:bg-gray-100"
+                >
+                  Archive
+                </button>
+              </div>
+            </div>
           ))}
-        </select>
-        <input
-          type="text"
-          placeholder="Heiti markmiðs"
-          value={newGoal.title}
-          onChange={(e) => setNewGoal({ ...newGoal, title: e.target.value })}
-        />
-        <textarea
-          placeholder="Lýsing markmiðs"
-          value={newGoal.description}
-          onChange={(e) =>
-            setNewGoal({ ...newGoal, description: e.target.value })
-          }
-        />
-        <button type="submit">Skrá</button>
-        <p>{statusMsg}</p>
-      </form>
-
-      <h4>Öll markmið</h4>
-      {goals.map((goal) => (
-        <div
-          key={goal.id}
-          style={{
-            border: '1px solid #ccc',
-            margin: '1em 0',
-            padding: '0.5em',
-          }}
-        >
-          <strong>{goal.title}</strong> — {goal.status}
-          <p>{goal.description}</p>
-          <button onClick={() => changeGoalStatus(goal.id, 'completed')}>
-            ✓ Lokið
-          </button>
-          <button onClick={() => changeGoalStatus(goal.id, 'archived')}>
-            🗂️ Taka úr umferð
-          </button>
         </div>
-      ))}
+      </div>
     </div>
   );
 }
