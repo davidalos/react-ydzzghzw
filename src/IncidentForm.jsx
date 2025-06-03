@@ -1,88 +1,36 @@
-// src/IncidentForm.js
-
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from './supabase';
+import { useAuth } from './hooks/useAuth';
+import toast from 'react-hot-toast';
 
-export default function IncidentForm({ user }) {
+export default function IncidentForm() {
+  const { user } = useAuth();
   const [clients, setClients] = useState([]);
-  const [clientId, setClientId] = useState('');
-  const [category, setCategory] = useState('');
-  const [description, setDescription] = useState('');
-  const [reflection, setReflection] = useState('');
-  const [serious, setSerious] = useState(false);
-  const [coStaff, setCoStaff] = useState('');
-  const [status, setStatus] = useState('');
+  const [formData, setFormData] = useState({
+    clientId: '',
+    category: '',
+    description: '',
+    reflection: '',
+    serious: false,
+    coStaff: '',
+  });
+  const [loading, setLoading] = useState(false);
 
-  const recognitionRef = useRef(null);
-
-  // 🎙️ Optional Voice-to-Text Support
-  function handleVoiceInput(target) {
-    if (!('webkitSpeechRecognition' in window)) {
-      alert('Raddgreining ekki studd í þessum vafra.');
-      return;
-    }
-
-    const recognition = new window.webkitSpeechRecognition();
-    recognition.lang = 'is-IS';
-    recognition.continuous = false;
-    recognition.interimResults = false;
-
-    recognition.onresult = function (event) {
-      const transcript = event.results[0][0].transcript;
-      if (target === 'description') {
-        setDescription((prev) => prev + ' ' + transcript);
-      } else {
-        setReflection((prev) => prev + ' ' + transcript);
-      }
-    };
-
-    recognition.start();
-    recognitionRef.current = recognition;
-  }
-
-  // Load clients from Supabase
   useEffect(() => {
-    async function loadClients() {
-      const { data, error } = await supabase
-        .from('clients')
-        .select('*')
-        .order('label', { ascending: true });
-      if (error) {
-        console.error('Villa við að sækja íbúa:', error.message);
-      } else {
-        setClients(data);
-      }
-    }
     loadClients();
   }, []);
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    if (!clientId || !category || !description) {
-      setStatus('Vinsamlegast fylltu út nauðsynlega reiti.');
-      return;
-    }
-
-    const { error } = await supabase.from('incidents').insert({
-      client_id: clientId,
-      category,
-      description,
-      reflection,
-      serious,
-      submitted_by: user.id,
-      co_staff: coStaff ? coStaff.split(',').map((s) => s.trim()) : [],
-    });
-
+  async function loadClients() {
+    const { data, error } = await supabase
+      .from('clients')
+      .select('*')
+      .order('label', { ascending: true });
+    
     if (error) {
-      setStatus('Villa við innsendingu: ' + error.message);
+      toast.error('Error loading clients');
+      console.error('Error:', error);
     } else {
-      setStatus('Atvik skráð með góðum árangri.');
-      setClientId('');
-      setCategory('');
-      setDescription('');
-      setReflection('');
-      setSerious(false);
-      setCoStaff('');
+      setClients(data);
     }
   }
 
@@ -92,73 +40,168 @@ export default function IncidentForm({ user }) {
     'Behavioral',
     'Safety',
     'Emergency',
-    'Other',
   ];
 
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      if (!formData.clientId || !formData.category || !formData.description) {
+        throw new Error('Please fill in all required fields');
+      }
+
+      const { error } = await supabase.from('incidents').insert({
+        client_id: formData.clientId,
+        category: formData.category,
+        description: formData.description,
+        reflection: formData.reflection,
+        serious: formData.serious,
+        submitted_by: user.id,
+        co_staff: formData.coStaff ? formData.coStaff.split(',').map(s => s.trim()) : [],
+      });
+
+      if (error) throw error;
+
+      toast.success('Incident recorded successfully');
+      
+      // Reset form
+      setFormData({
+        clientId: '',
+        category: '',
+        description: '',
+        reflection: '',
+        serious: false,
+        coStaff: '',
+      });
+
+    } catch (error) {
+      toast.error(error.message);
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Skrá atvik</h2>
+    <div className="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-6">Skrá atvik</h2>
 
-      <label>Íbúi</label>
-      <select value={clientId} onChange={(e) => setClientId(e.target.value)}>
-        <option value="">Veldu íbúa</option>
-        {clients.map((client) => (
-          <option key={client.id} value={client.id}>
-            {client.label}
-          </option>
-        ))}
-      </select>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Íbúi *
+          </label>
+          <select
+            name="clientId"
+            value={formData.clientId}
+            onChange={handleInputChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            required
+          >
+            <option value="">Veldu íbúa</option>
+            {clients.map((client) => (
+              <option key={client.id} value={client.id}>
+                {client.label}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      <label>Flokkur</label>
-      <select value={category} onChange={(e) => setCategory(e.target.value)}>
-        <option value="">Veldu flokk</option>
-        {categories.map((cat) => (
-          <option key={cat} value={cat}>
-            {cat}
-          </option>
-        ))}
-      </select>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Flokkur *
+          </label>
+          <select
+            name="category"
+            value={formData.category}
+            onChange={handleInputChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            required
+          >
+            <option value="">Veldu flokk</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      <label>Lýsing</label>
-      <textarea
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        placeholder="Hvað gerðist?"
-      />
-      <button type="button" onClick={() => handleVoiceInput('description')}>
-        🎙️ Tala (Lýsing)
-      </button>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Lýsing *
+          </label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleInputChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            rows="4"
+            required
+            placeholder="Hvað gerðist?"
+          />
+        </div>
 
-      <label>Hugleiðing</label>
-      <textarea
-        value={reflection}
-        onChange={(e) => setReflection(e.target.value)}
-        placeholder="Hvað hefði mátt fara öðruvísi? Hvernig brást teymið við?"
-      />
-      <button type="button" onClick={() => handleVoiceInput('reflection')}>
-        🎙️ Tala (Hugleiðing)
-      </button>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Hugleiðing
+          </label>
+          <textarea
+            name="reflection"
+            value={formData.reflection}
+            onChange={handleInputChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            rows="3"
+            placeholder="Hvað hefði mátt fara öðruvísi? Hvernig brást teymið við?"
+          />
+        </div>
 
-      <label>Samstarfsmenn sem komu að þessu (ef einhverjir)</label>
-      <input
-        type="text"
-        value={coStaff}
-        onChange={(e) => setCoStaff(e.target.value)}
-        placeholder="Nöfn aðskilin með kommu (t.d. Anna, Björn)"
-      />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Samstarfsmenn
+          </label>
+          <input
+            type="text"
+            name="coStaff"
+            value={formData.coStaff}
+            onChange={handleInputChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            placeholder="Nöfn aðskilin með kommu (t.d. Anna, Björn)"
+          />
+        </div>
 
-      <label>
-        <input
-          type="checkbox"
-          checked={serious}
-          onChange={(e) => setSerious(e.target.checked)}
-        />{' '}
-        Alvarlegt atvik
-      </label>
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            name="serious"
+            checked={formData.serious}
+            onChange={handleInputChange}
+            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+          />
+          <label className="ml-2 block text-sm text-gray-900">
+            Alvarlegt atvik
+          </label>
+        </div>
 
-      <br />
-      <button type="submit">Skrá atvik</button>
-      <p>{status}</p>
-    </form>
+        <div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            {loading ? 'Skrái...' : 'Skrá atvik'}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }

@@ -11,6 +11,7 @@ export default function GoalsDashboard() {
     title: '',
     description: '',
   });
+  const [loading, setLoading] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -19,9 +20,13 @@ export default function GoalsDashboard() {
   }, []);
 
   async function loadClients() {
-    const { data, error } = await supabase.from('clients').select('*');
+    const { data, error } = await supabase
+      .from('clients')
+      .select('*')
+      .order('label', { ascending: true });
     if (error) {
       toast.error('Failed to load clients');
+      console.error('Error:', error);
     } else {
       setClients(data);
     }
@@ -34,6 +39,7 @@ export default function GoalsDashboard() {
       .order('created_at', { ascending: false });
     if (error) {
       toast.error('Failed to load goals');
+      console.error('Error:', error);
     } else {
       setGoals(data);
     }
@@ -41,38 +47,50 @@ export default function GoalsDashboard() {
 
   async function handleCreateGoal(e) {
     e.preventDefault();
-    if (!newGoal.client_id || !newGoal.title) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
+    setLoading(true);
 
-    const { error } = await supabase.from('goals').insert({
-      client_id: newGoal.client_id,
-      title: newGoal.title,
-      description: newGoal.description,
-      created_by: user.id,
-    });
+    try {
+      if (!newGoal.client_id || !newGoal.title) {
+        throw new Error('Please fill in all required fields');
+      }
 
-    if (error) {
-      toast.error('Failed to create goal');
-    } else {
+      const { error } = await supabase.from('goals').insert({
+        client_id: newGoal.client_id,
+        title: newGoal.title,
+        description: newGoal.description,
+        created_by: user.id,
+      });
+
+      if (error) throw error;
+
       toast.success('Goal created successfully');
       setNewGoal({ client_id: '', title: '', description: '' });
       loadGoals();
+    } catch (error) {
+      toast.error(error.message);
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
     }
   }
 
   async function changeGoalStatus(goalId, newStatus) {
-    const { error } = await supabase
-      .from('goals')
-      .update({ status: newStatus })
-      .eq('id', goalId);
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('goals')
+        .update({ status: newStatus })
+        .eq('id', goalId);
 
-    if (error) {
-      toast.error('Failed to update goal status');
-    } else {
+      if (error) throw error;
+
       toast.success('Goal status updated');
       loadGoals();
+    } catch (error) {
+      toast.error('Failed to update goal status');
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -133,9 +151,10 @@ export default function GoalsDashboard() {
 
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
           >
-            Create Goal
+            {loading ? 'Creating...' : 'Create Goal'}
           </button>
         </form>
       </div>
@@ -173,12 +192,14 @@ export default function GoalsDashboard() {
               <div className="mt-4 flex gap-2">
                 <button
                   onClick={() => changeGoalStatus(goal.id, 'completed')}
+                  disabled={loading}
                   className="text-sm px-3 py-1 rounded bg-green-50 text-green-700 hover:bg-green-100"
                 >
                   Mark Complete
                 </button>
                 <button
                   onClick={() => changeGoalStatus(goal.id, 'archived')}
+                  disabled={loading}
                   className="text-sm px-3 py-1 rounded bg-gray-50 text-gray-700 hover:bg-gray-100"
                 >
                   Archive
