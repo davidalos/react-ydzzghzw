@@ -7,42 +7,62 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  async function loadUserProfile(userId) {
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+      return null;
+    }
+  }
+
   useEffect(() => {
     let mounted = true;
 
-    async function initialize() {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (!mounted) return;
-        
-        if (session?.user) {
-          setUser(session.user);
-          await loadUserProfile(session.user.id);
-        } else {
-          setUser(null);
-          setProfile(null);
-          setLoading(false);
-        }
-      } catch (err) {
-        console.error('Error initializing auth:', err);
-        setError(err.message);
-        setLoading(false);
-      }
-    }
-
-    initialize();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    // Get initial session
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!mounted) return;
       
       if (session?.user) {
         setUser(session.user);
-        await loadUserProfile(session.user.id);
+        const profile = await loadUserProfile(session.user.id);
+        if (mounted) {
+          setProfile(profile);
+          setLoading(false);
+        }
       } else {
-        setUser(null);
-        setProfile(null);
-        setLoading(false);
+        if (mounted) {
+          setUser(null);
+          setProfile(null);
+          setLoading(false);
+        }
+      }
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return;
+
+      if (session?.user) {
+        setUser(session.user);
+        const profile = await loadUserProfile(session.user.id);
+        if (mounted) {
+          setProfile(profile);
+          setLoading(false);
+        }
+      } else {
+        if (mounted) {
+          setUser(null);
+          setProfile(null);
+          setLoading(false);
+        }
       }
     });
 
@@ -52,33 +72,10 @@ export function useAuth() {
     };
   }, []);
 
-  async function loadUserProfile(userId) {
-    try {
-      setError(null);
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
-
-      if (error) throw error;
-      
-      setProfile(data || null);
-    } catch (error) {
-      console.error('Error loading user profile:', error.message);
-      setError(error.message);
-      setProfile(null);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const isManager = profile?.role === 'manager';
-  
   return {
     user,
     profile,
-    isManager,
+    isManager: profile?.role === 'manager',
     loading,
     error,
   };
