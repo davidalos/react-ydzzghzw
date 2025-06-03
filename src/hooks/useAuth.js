@@ -53,7 +53,7 @@ export function useAuth() {
         .from('user_profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         throw error;

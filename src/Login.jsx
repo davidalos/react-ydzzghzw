@@ -32,14 +32,14 @@ export default function Login() {
         .from('user_profiles')
         .select('role')
         .eq('id', data.user.id)
-        .single();
+        .maybeSingle();
 
       if (profileError) throw profileError;
 
       toast.success('Welcome back!');
       
-      // Redirect based on role
-      if (profile.role === 'manager') {
+      // Redirect based on role, default to employee view if no profile found
+      if (profile?.role === 'manager') {
         navigate('/yfirlit');
       } else {
         navigate('/atvik');
