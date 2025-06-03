@@ -9,15 +9,6 @@ if (!supabaseUrl || !supabaseKey) {
   );
 }
 
-// Validate URL format
-try {
-  new URL(supabaseUrl);
-} catch (error) {
-  throw new Error(
-    'Invalid Supabase URL format. Please reconnect to Supabase by clicking the "Connect to Supabase" button in the top right corner.'
-  );
-}
-
 // Create Supabase client with additional options for better error handling
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
@@ -31,16 +22,18 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
       'X-Client-Info': 'supabase-js-web'
     }
   },
-  db: {
-    schema: 'public'
+  realtime: {
+    params: {
+      eventsPerSecond: 10
+    }
   }
 });
 
 // Test the connection
-supabase.from('user_profiles').select('count', { count: 'exact', head: true })
-  .then(() => {
+supabase.auth.getSession().then(({ data: { session } }) => {
+  if (session) {
     console.log('Successfully connected to Supabase');
-  })
-  .catch((error) => {
-    console.error('Failed to connect to Supabase:', error.message);
-  });
+  }
+}).catch(error => {
+  console.error('Failed to connect to Supabase:', error.message);
+});

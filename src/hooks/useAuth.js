@@ -7,62 +7,61 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  async function loadUserProfile(userId) {
-    try {
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error loading user profile:', error);
-      return null;
-    }
-  }
-
   useEffect(() => {
     let mounted = true;
 
-    // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!mounted) return;
-      
-      if (session?.user) {
-        setUser(session.user);
-        const profile = await loadUserProfile(session.user.id);
-        if (mounted) {
-          setProfile(profile);
-          setLoading(false);
+    async function initialize() {
+      try {
+        // Get initial session
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!mounted) return;
+
+        if (session?.user) {
+          setUser(session.user);
+          const { data: profile, error: profileError } = await supabase
+            .from('user_profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .maybeSingle();
+
+          if (profileError) throw profileError;
+          if (mounted) setProfile(profile);
         }
-      } else {
-        if (mounted) {
-          setUser(null);
-          setProfile(null);
-          setLoading(false);
-        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+        if (mounted) setError(error.message);
+      } finally {
+        if (mounted) setLoading(false);
       }
-    });
+    }
+
+    initialize();
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
 
-      if (session?.user) {
-        setUser(session.user);
-        const profile = await loadUserProfile(session.user.id);
-        if (mounted) {
+      try {
+        if (session?.user) {
+          setUser(session.user);
+          const { data: profile, error: profileError } = await supabase
+            .from('user_profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .maybeSingle();
+
+          if (profileError) throw profileError;
           setProfile(profile);
-          setLoading(false);
-        }
-      } else {
-        if (mounted) {
+        } else {
           setUser(null);
           setProfile(null);
-          setLoading(false);
         }
+      } catch (error) {
+        console.error('Auth state change error:', error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
       }
     });
 
