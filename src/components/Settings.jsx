@@ -5,11 +5,16 @@ import { useAuth } from '../hooks/useAuth';
 import toast from 'react-hot-toast';
 
 export function Settings({ isOpen, onClose }) {
-  const { profile, user } = useAuth();
+  const { profile, user, isManager } = useAuth();
   const [role, setRole] = useState(profile?.role || 'employee');
   const [loading, setLoading] = useState(false);
 
   const handleRoleChange = async (newRole) => {
+    if (!isManager) {
+      toast.error('Only managers can change roles');
+      return;
+    }
+
     setLoading(true);
     try {
       const { error } = await supabase
@@ -50,12 +55,15 @@ export function Settings({ isOpen, onClose }) {
               <select
                 value={role}
                 onChange={(e) => handleRoleChange(e.target.value)}
-                disabled={loading}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                disabled={!isManager || loading}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
               >
                 <option value="employee">Employee</option>
                 <option value="manager">Manager</option>
               </select>
+              {!isManager && (
+                <p className="mt-1 text-sm text-gray-500">Only managers can change roles</p>
+              )}
             </div>
 
             <div>
