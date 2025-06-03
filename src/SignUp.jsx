@@ -13,7 +13,12 @@ export default function SignUp() {
 
   async function handleSignUp(e) {
     e.preventDefault();
-    
+
+    if (!fullName.trim()) {
+      toast.error('Please enter your full name');
+      return;
+    }
+
     if (password.length < 6) {
       toast.error('Password must be at least 6 characters long');
       return;
@@ -22,10 +27,13 @@ export default function SignUp() {
     setLoading(true);
 
     try {
-      // First create the auth user
+      // 1. Create the user in Supabase Auth
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: { full_name: fullName } // saved in user_metadata
+        }
       });
 
       if (signUpError) {
@@ -44,7 +52,7 @@ export default function SignUp() {
         throw new Error('Failed to create user');
       }
 
-      // Then create the user profile
+      // 2. Create the associated user profile
       const { error: profileError } = await supabase
         .from('user_profiles')
         .insert([
@@ -58,7 +66,6 @@ export default function SignUp() {
         .single();
 
       if (profileError) {
-        // If profile creation fails, delete the auth user to maintain consistency
         await supabase.auth.signOut();
         throw new Error('Failed to create user profile. Please try again.');
       }
@@ -67,7 +74,7 @@ export default function SignUp() {
       navigate('/login');
     } catch (error) {
       toast.error(error.message);
-      console.error('Error:', error);
+      console.error('Sign-up error:', error);
     } finally {
       setLoading(false);
     }
@@ -93,72 +100,64 @@ export default function SignUp() {
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email address
               </label>
-              <div className="mt-1">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-              </div>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              />
             </div>
 
             <div>
               <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
                 Full Name
               </label>
-              <div className="mt-1">
-                <input
-                  id="fullName"
-                  name="fullName"
-                  type="text"
-                  required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-              </div>
+              <input
+                id="fullName"
+                name="fullName"
+                type="text"
+                required
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              />
             </div>
 
             <div>
               <label htmlFor="role" className="block text-sm font-medium text-gray-700">
                 Role
               </label>
-              <div className="mt-1">
-                <select
-                  id="role"
-                  name="role"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                >
-                  <option value="employee">Employee</option>
-                  <option value="manager">Manager</option>
-                </select>
-              </div>
+              <select
+                id="role"
+                name="role"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              >
+                <option value="employee">Employee</option>
+                <option value="manager">Manager</option>
+              </select>
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Password
               </label>
-              <div className="mt-1">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="new-password"
-                  required
-                  minLength={6}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-              </div>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              />
               <p className="mt-1 text-sm text-gray-500">
                 Password must be at least 6 characters long
               </p>
@@ -168,27 +167,18 @@ export default function SignUp() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
               >
                 {loading ? 'Creating account...' : 'Sign up'}
               </button>
             </div>
           </form>
 
-          <div className="mt-6">
-            <div className="relative">
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
-                  Already have an account?{' '}
-                  <Link
-                    to="/login"
-                    className="font-medium text-indigo-600 hover:text-indigo-500"
-                  >
-                    Sign in
-                  </Link>
-                </span>
-              </div>
-            </div>
+          <div className="mt-6 text-center text-sm">
+            Already have an account?{' '}
+            <Link to="/login" className="text-indigo-600 hover:text-indigo-500 font-medium">
+              Sign in
+            </Link>
           </div>
         </div>
       </div>
