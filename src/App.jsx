@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
 import Login from './Login.jsx';
+import SignUp from './SignUp.jsx';
 import IncidentForm from './IncidentForm.jsx';
 import IncidentDashboard from './IncidentDashboard.jsx';
 import GoalsDashboard from './GoalsDashboard.jsx';
@@ -34,13 +35,14 @@ function App() {
         <div className="min-h-screen bg-gray-100">
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
             <Route
               path="/*"
               element={
                 <PrivateRoute>
                   <Navigation />
                   <Routes>
-                    <Route path="/\" element={<Navigate to="/atvik\" replace />} />
+                    <Route path="/" element={<Navigate to="/atvik" replace />} />
                     <Route
                       path="/atvik"
                       element={
@@ -94,5 +96,3 @@ function App() {
     </QueryClientProvider>
   );
 }
-
-export default App;
