@@ -53,9 +53,15 @@ export default function SignUp() {
             full_name: fullName,
             role: role
           }
-        ]);
+        ])
+        .select()
+        .single();
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        // If profile creation fails, delete the auth user to maintain consistency
+        await supabase.auth.signOut();
+        throw new Error('Failed to create user profile. Please try again.');
+      }
 
       toast.success('Account created successfully! You can now sign in.');
       navigate('/login');
