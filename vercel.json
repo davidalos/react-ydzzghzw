@@ -1,12 +1,23 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "dist",
   "installCommand": "npm install",
+  "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/old-route",
+      "destination": "/new-route",
+      "permanent": true
     }
   ]
 }
