@@ -45,7 +45,7 @@ function App() {
                     <Navigation />
                     <div className="container mx-auto px-4 py-8">
                       <Routes>
-                        <Route path="/\" element={<Home />} />
+                        <Route path="/" element={<Home />} />
                         <Route
                           path="/atvik"
                           element={
@@ -89,4 +89,4 @@ function App() {
   );
 }
 
-export default App
+export default App;
