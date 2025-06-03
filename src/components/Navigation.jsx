@@ -22,9 +22,9 @@ export function Navigation() {
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <img
-                className="h-8 w-8"
-                src="https://via.placeholder.com/150?text=Logo"
-                alt="Your Company"
+                className="h-8 w-auto"
+                src="/og.png"
+                alt="Kópavogsbær"
               />
             </div>
             <div className="hidden md:block">
