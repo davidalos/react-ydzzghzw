@@ -3,15 +3,15 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
-import Login from './Login';
-import IncidentForm from './IncidentForm';
-import IncidentDashboard from './IncidentDashboard';
-import GoalsDashboard from './GoalsDashboard';
-import GoalUpdateForm from './GoalUpdateForm';
-import GoalProgressChart from './GoalProgressChart';
-import { ManagerDashboard } from './components/ManagerDashboard';
-import { PrivateRoute } from './components/PrivateRoute';
-import { Navigation } from './components/Navigation';
+import Login from './Login.jsx';
+import IncidentForm from './IncidentForm.jsx';
+import IncidentDashboard from './IncidentDashboard.jsx';
+import GoalsDashboard from './GoalsDashboard.jsx';
+import GoalUpdateForm from './GoalUpdateForm.jsx';
+import GoalProgressChart from './GoalProgressChart.jsx';
+import { ManagerDashboard } from './components/ManagerDashboard.jsx';
+import { PrivateRoute } from './components/PrivateRoute.jsx';
+import { Navigation } from './components/Navigation.jsx';
 import { useAuth } from './hooks/useAuth';
 
 const queryClient = new QueryClient();
@@ -40,7 +40,7 @@ function App() {
                 <PrivateRoute>
                   <Navigation />
                   <Routes>
-                    <Route path="/\" element={<Navigate to="/atvik\" replace />} />
+                    <Route path="/" element={<Navigate to="/atvik" replace />} />
                     <Route
                       path="/atvik"
                       element={
