@@ -10,6 +10,7 @@ export function Settings({ isOpen, onClose }) {
   const [loading, setLoading] = useState(false);
 
   const handleRoleChange = async (newRole) => {
+    // Only managers can change roles
     if (!isManager) {
       toast.error('Only managers can change roles');
       return;
@@ -62,7 +63,9 @@ export function Settings({ isOpen, onClose }) {
                 <option value="manager">Manager</option>
               </select>
               {!isManager && (
-                <p className="mt-1 text-sm text-gray-500">Only managers can change roles</p>
+                <p className="mt-1 text-sm text-gray-500">
+                  Only managers can change roles
+                </p>
               )}
             </div>
 
