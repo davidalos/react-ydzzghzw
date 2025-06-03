@@ -20,18 +20,33 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (signInError) throw signInError;
+      if (error) throw error;
+
+      // Fetch user profile to get role
+      const { data: profile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single();
+
+      if (profileError) throw profileError;
 
       toast.success('Welcome back!');
-      navigate('/');
+      
+      // Redirect based on role, default to employee view if no profile found
+      if (profile?.role === 'manager') {
+        navigate('/yfirlit');
+      } else {
+        navigate('/atvik');
+      }
     } catch (error) {
       console.error('Login error:', error);
-      toast.error(error.message);
+      toast.error('Failed to sign in. Please check your credentials.');
       await supabase.auth.signOut();
     } finally {
       setLoading(false);

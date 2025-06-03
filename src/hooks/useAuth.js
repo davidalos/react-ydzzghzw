@@ -25,7 +25,7 @@ export function useAuth() {
             .from('user_profiles')
             .select('*')
             .eq('id', session.user.id)
-            .maybeSingle();
+            .single();
 
           if (profileError) {
             console.error('Profile fetch error:', profileError);
@@ -34,17 +34,6 @@ export function useAuth() {
               setUser(null);
               setProfile(null);
               toast.error('Error loading user profile. Please sign in again.');
-            }
-            return;
-          }
-
-          if (!profile) {
-            console.error('No profile found for user:', session.user.id);
-            await supabase.auth.signOut();
-            if (mounted) {
-              setUser(null);
-              setProfile(null);
-              toast.error('User profile not found. Please sign up again.');
             }
             return;
           }
@@ -80,7 +69,7 @@ export function useAuth() {
             .from('user_profiles')
             .select('*')
             .eq('id', session.user.id)
-            .maybeSingle();
+            .single();
 
           if (profileError) {
             console.error('Profile fetch error:', profileError);
@@ -88,15 +77,6 @@ export function useAuth() {
             setUser(null);
             setProfile(null);
             toast.error('Error loading user profile. Please sign in again.');
-            return;
-          }
-
-          if (!profile) {
-            console.error('No profile found for user:', session.user.id);
-            await supabase.auth.signOut();
-            setUser(null);
-            setProfile(null);
-            toast.error('User profile not found. Please sign up again.');
             return;
           }
 
