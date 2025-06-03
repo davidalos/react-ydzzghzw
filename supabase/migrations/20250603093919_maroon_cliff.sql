@@ -1,5 +1,5 @@
 /*
-  # Complete Schema Setup with Latest Policies
+  # Complete Schema Setup
   
   1. Tables
     - user_profiles (with role management)
@@ -10,12 +10,27 @@
     
   2. Security
     - RLS enabled on all tables
-    - Latest policies for each table
-    - Improved role-based update policies
+    - Appropriate policies for each table
     
   3. Performance
     - Indexes on frequently queried columns
 */
+
+-- Drop all existing policies first
+DO $$ 
+BEGIN
+  DROP POLICY IF EXISTS "Users can read own profile" ON public.user_profiles;
+  DROP POLICY IF EXISTS "user_profile_self_update_v3" ON public.user_profiles;
+  DROP POLICY IF EXISTS "manager_profile_update_v3" ON public.user_profiles;
+  DROP POLICY IF EXISTS "All authenticated users can read clients" ON public.clients;
+  DROP POLICY IF EXISTS "Users can create incidents" ON public.incidents;
+  DROP POLICY IF EXISTS "Users can read own incidents" ON public.incidents;
+  DROP POLICY IF EXISTS "All authenticated users can read goals" ON public.goals;
+  DROP POLICY IF EXISTS "Users can create goals" ON public.goals;
+  DROP POLICY IF EXISTS "Users can update own goals" ON public.goals;
+  DROP POLICY IF EXISTS "All authenticated users can read goal updates" ON public.goal_updates;
+  DROP POLICY IF EXISTS "Users can create goal updates" ON public.goal_updates;
+END $$;
 
 -- Create user_profiles table
 CREATE TABLE IF NOT EXISTS user_profiles (
@@ -28,7 +43,6 @@ CREATE TABLE IF NOT EXISTS user_profiles (
 
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
 
--- Latest user profile policies
 CREATE POLICY "Users can read own profile"
   ON user_profiles
   FOR SELECT
