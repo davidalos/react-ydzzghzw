@@ -22,7 +22,8 @@ export default function SignUp() {
     setLoading(true);
 
     try {
-      const { data: { user }, error: signUpError } = await supabase.auth.signUp({
+      // First create the auth user
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
       });
@@ -39,25 +40,28 @@ export default function SignUp() {
         throw signUpError;
       }
 
-      if (user) {
-        // Create user profile with selected role
-        const { error: profileError } = await supabase
-          .from('user_profiles')
-          .insert([
-            {
-              id: user.id,
-              full_name: fullName,
-              role: role
-            }
-          ]);
-
-        if (profileError) throw profileError;
+      if (!authData.user) {
+        throw new Error('Failed to create user');
       }
+
+      // Then create the user profile
+      const { error: profileError } = await supabase
+        .from('user_profiles')
+        .insert([
+          {
+            id: authData.user.id,
+            full_name: fullName,
+            role: role
+          }
+        ]);
+
+      if (profileError) throw profileError;
 
       toast.success('Account created successfully! You can now sign in.');
       navigate('/login');
     } catch (error) {
       toast.error(error.message);
+      console.error('Error:', error);
     } finally {
       setLoading(false);
     }

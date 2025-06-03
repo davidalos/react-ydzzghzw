@@ -10,26 +10,29 @@ export function useAuth() {
   useEffect(() => {
     let mounted = true;
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      
-      if (session?.user) {
-        setUser(session.user);
-        loadUserProfile(session.user.id);
-      } else {
-        setUser(null);
-        setProfile(null);
+    async function initialize() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!mounted) return;
+        
+        if (session?.user) {
+          setUser(session.user);
+          await loadUserProfile(session.user.id);
+        } else {
+          setUser(null);
+          setProfile(null);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error('Error initializing auth:', err);
+        setError(err.message);
         setLoading(false);
       }
-    }).catch(err => {
-      if (!mounted) return;
-      console.error('Error getting session:', err.message);
-      setError(err.message);
-      setLoading(false);
-    });
+    }
 
-    // Listen for changes
+    initialize();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!mounted) return;
       
@@ -59,7 +62,7 @@ export function useAuth() {
         .maybeSingle();
 
       if (error) throw error;
-
+      
       setProfile(data || null);
     } catch (error) {
       console.error('Error loading user profile:', error.message);
