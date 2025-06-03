@@ -32,7 +32,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <Toaster position="top-right" />
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen bg-gray-50">
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
@@ -40,38 +40,40 @@ function App() {
               path="/*"
               element={
                 <PrivateRoute>
-                  <Navigation />
-                  <Routes>
-                    <Route path="/\" element={<Navigate to="/atvik\" replace />} />
-                    <Route
-                      path="/atvik"
-                      element={
-                        <div className="container mx-auto px-4 py-8">
-                          <IncidentForm />
-                          <hr className="my-8" />
-                          <IncidentDashboard />
-                        </div>
-                      }
-                    />
-                    <Route
-                      path="/markmid"
-                      element={
-                        <div className="container mx-auto px-4 py-8">
-                          <GoalsDashboard />
-                          <hr className="my-8" />
-                          <GoalUpdateForm />
-                        </div>
-                      }
-                    />
-                    <Route
-                      path="/yfirlit"
-                      element={
-                        <PrivateRoute requireManager={true}>
-                          <ManagerDashboard />
-                        </PrivateRoute>
-                      }
-                    />
-                  </Routes>
+                  <div className="min-h-screen bg-gray-100">
+                    <Navigation />
+                    <Routes>
+                      <Route path="/" element={<Navigate to="/atvik" replace />} />
+                      <Route
+                        path="/atvik"
+                        element={
+                          <div className="container mx-auto px-4 py-8">
+                            <IncidentForm />
+                            <hr className="my-8" />
+                            <IncidentDashboard />
+                          </div>
+                        }
+                      />
+                      <Route
+                        path="/markmid"
+                        element={
+                          <div className="container mx-auto px-4 py-8">
+                            <GoalsDashboard />
+                            <hr className="my-8" />
+                            <GoalUpdateForm />
+                          </div>
+                        }
+                      />
+                      <Route
+                        path="/yfirlit"
+                        element={
+                          <PrivateRoute requireManager={true}>
+                            <ManagerDashboard />
+                          </PrivateRoute>
+                        }
+                      />
+                    </Routes>
+                  </div>
                 </PrivateRoute>
               }
             />
@@ -97,4 +99,4 @@ function App() {
   );
 }
 
-export default App
+export default App;
