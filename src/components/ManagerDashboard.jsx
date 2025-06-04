@@ -17,12 +17,14 @@ import {
   LineChart,
   Line,
 } from 'recharts';
+import { useAuth } from '../hooks/useAuth';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
 export function ManagerDashboard() {
   const [timeRange, setTimeRange] = useState('month');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const { isManager } = useAuth();
 
   const { data: incidents } = useQuery(['incidents', timeRange, selectedCategory], async () => {
     let query = supabase
@@ -101,6 +103,29 @@ export function ManagerDashboard() {
     };
   });
 
+  const handleExportCSV = () => {
+    if (!incidents) return;
+    const header = ['Date', 'Category', 'Submitted By', 'Description'];
+    const rows = incidents.map((i) => [
+      format(new Date(i.created_at), 'yyyy-MM-dd'),
+      i.category,
+      i.user_profiles?.full_name || '',
+      (i.description || '').replace(/\r?\n/g, ' '),
+    ]);
+    const csv = [header, ...rows]
+      .map((row) => row.map((f) => `"${String(f).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'incidents.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="p-4 md:p-6">
       <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
@@ -129,6 +154,15 @@ export function ManagerDashboard() {
             <option value="Safety">Öryggi</option>
             <option value="Emergency">Neyðartilvik</option>
           </select>
+
+          {isManager && (
+            <button
+              onClick={handleExportCSV}
+              className="rounded-md bg-indigo-600 px-4 py-2 text-white shadow hover:bg-indigo-700"
+            >
+              Export CSV
+            </button>
+          )}
         </div>
       </div>
 
