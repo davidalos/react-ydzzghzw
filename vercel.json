@@ -6,7 +6,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/verify-turnstyle.js"
+      "destination": "/api/verify-turnstile.js"
     },
     {
       "source": "/(.*)",
