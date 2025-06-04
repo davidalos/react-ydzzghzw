@@ -3,12 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../supabase';
 import { Settings } from './Settings';
-import { Cog6ToothIcon } from '@heroicons/react/24/outline';
+import { Cog6ToothIcon, Bars3Icon, UserCircleIcon } from '@heroicons/react/24/outline';
 
 export function Navigation() {
   const { profile, isManager } = useAuth();
   const navigate = useNavigate();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -16,11 +17,17 @@ export function Navigation() {
   };
 
   return (
-    <nav className="bg-indigo-600">
+    <nav className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo + Links */}
           <div className="flex items-center">
+            <button
+              className="text-white md:hidden mr-2"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              <Bars3Icon className="h-6 w-6" />
+            </button>
             <div className="flex-shrink-0">
               <Link to="/" className="block">
                 <img className="h-12 w-auto" src="/og.png" alt="Kópavogsbær" />
@@ -40,14 +47,12 @@ export function Navigation() {
                 >
                   Markmið
                 </Link>
-                {isManager && (
-                  <Link
-                    to="/yfirlit"
-                    className="text-white hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    Yfirlit
-                  </Link>
-                )}
+                <Link
+                  to="/yfirlit"
+                  className="text-white hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Yfirlit
+                </Link>
               </div>
             </div>
           </div>
@@ -55,11 +60,14 @@ export function Navigation() {
           {/* Right Side: User Info + Settings + Logout */}
           <div className="hidden md:block">
             <div className="ml-4 flex items-center space-x-4 md:ml-6">
-              <div className="flex flex-col items-end text-white text-sm">
-                <span>{profile?.full_name}</span>
-                <span className="text-xs opacity-75">
-                  {isManager ? '🧑‍💼 Manager' : '👷 Staff'}
-                </span>
+              <div className="flex items-center space-x-1 text-white text-sm">
+                <UserCircleIcon className="h-6 w-6" />
+                <div className="flex flex-col items-end">
+                  <span>{profile?.full_name}</span>
+                  <span className="text-xs opacity-75">
+                    {isManager ? '🧑‍💼 Manager' : '👷 Staff'}
+                  </span>
+                </div>
               </div>
 
               <button
@@ -80,6 +88,41 @@ export function Navigation() {
           </div>
         </div>
       </div>
+
+      {mobileMenuOpen && (
+        <div className="md:hidden px-2 pt-2 pb-3 space-y-1 bg-indigo-500">
+          <Link
+            to="/atvik"
+            className="block text-white px-3 py-2 rounded-md text-base font-medium"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Atvik
+          </Link>
+          <Link
+            to="/markmid"
+            className="block text-white px-3 py-2 rounded-md text-base font-medium"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Markmið
+          </Link>
+          <Link
+            to="/yfirlit"
+            className="block text-white px-3 py-2 rounded-md text-base font-medium"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Yfirlit
+          </Link>
+          <button
+            onClick={() => {
+              setMobileMenuOpen(false);
+              handleLogout();
+            }}
+            className="block w-full text-left text-white px-3 py-2 rounded-md text-base font-medium"
+          >
+            Útskrá
+          </button>
+        </div>
+      )}
 
       {/* Settings Modal */}
       <Settings isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
