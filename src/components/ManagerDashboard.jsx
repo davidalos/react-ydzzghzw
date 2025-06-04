@@ -48,9 +48,15 @@ export function ManagerDashboard() {
       query = query.eq('category', selectedCategory);
     }
 
-    const { data, error } = await query;
-    if (error) throw error;
-    return data;
+    try {
+      const { data, error } = await query;
+      if (error) throw error;
+      localStorage.setItem('offlineIncidents', JSON.stringify(data || []));
+      return data;
+    } catch (err) {
+      const offline = JSON.parse(localStorage.getItem('offlineIncidents') || '[]');
+      return offline;
+    }
   });
 
   const { data: goals } = useQuery('goals', async () => {

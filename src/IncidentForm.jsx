@@ -4,7 +4,7 @@ import { useAuth } from './hooks/useAuth';
 import toast from 'react-hot-toast';
 
 export default function IncidentForm() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [clients, setClients] = useState([]);
   const [formData, setFormData] = useState({
     clientId: '',
@@ -80,7 +80,22 @@ export default function IncidentForm() {
       if (error) throw error;
 
       toast.success('Incident recorded successfully');
-      
+
+      // Save a local copy for offline access
+      const offline = JSON.parse(localStorage.getItem('offlineIncidents') || '[]');
+      offline.unshift({
+        id: Date.now(),
+        created_at: new Date().toISOString(),
+        client_id: formData.clientId,
+        category: formData.category,
+        description: formData.description,
+        reflection: formData.reflection,
+        serious: formData.serious,
+        submitted_by: user.id,
+        user_profiles: { full_name: profile?.full_name || '' }
+      });
+      localStorage.setItem('offlineIncidents', JSON.stringify(offline));
+
       // Reset form
       setFormData({
         clientId: '',
