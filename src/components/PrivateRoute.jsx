@@ -20,7 +20,8 @@ export function PrivateRoute({ children, requireManager = false }) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (requireManager && !isManager) 
+  if (requireManager && !isManager) {
+    return <Navigate to="/unauthorized\" replace />;
   }
 
   return children;
