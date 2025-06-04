@@ -13,12 +13,6 @@ export default function Login() {
 
   async function handleLogin(e) {
     e.preventDefault();
-
-    if (!email || !password || password.length < 6) {
-      toast.error('Please enter valid email and password');
-      return;
-    }
-
     setLoading(true);
 
     try {
