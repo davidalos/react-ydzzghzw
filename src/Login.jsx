@@ -13,6 +13,17 @@ export default function Login() {
 
   async function handleLogin(e) {
     e.preventDefault();
+
+    if (!turnstileToken) {
+      toast.error('Please complete the CAPTCHA verification');
+      return;
+    }
+
+    if (!email || !password || password.length < 6) {
+      toast.error('Please enter valid email and password');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -100,7 +111,8 @@ export default function Login() {
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                disabled={loading || !turnstileToken || !email || !password}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 {loading ? 'Signing in…' : 'Sign in'}
               </button>
