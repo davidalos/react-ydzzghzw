@@ -13,6 +13,7 @@ import GoalUpdateForm from './GoalUpdateForm.jsx';
 import GoalProgressChart from './GoalProgressChart.jsx';
 import Unauthorized from './Unauthorized.jsx';
 import { ManagerDashboard } from './components/ManagerDashboard.jsx';
+import Yfirlit from './Yfirlit.jsx';
 import { PrivateRoute } from './components/PrivateRoute.jsx';
 import { Navigation } from './components/Navigation.jsx';
 import { useAuth } from './hooks/useAuth';
@@ -75,7 +76,7 @@ function App() {
                         />
                         <Route
                           path="/yfirlit"
-                          element={<ManagerDashboard />}
+                          element={<Yfirlit />}
                         />
                       </Routes>
                     </div>
