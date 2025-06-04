@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { supabase } from './supabase';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import Turnstile from 'react-turnstile';
 
 export default function SignUp() {
   const [email, setEmail] = useState('');
@@ -9,6 +10,7 @@ export default function SignUp() {
   const [fullName, setFullName] = useState('');
   const [role, setRole] = useState('employee');
   const [loading, setLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState(null);
   const navigate = useNavigate();
 
   async function handleSignUp(e) {
@@ -24,6 +26,11 @@ export default function SignUp() {
       return;
     }
 
+    if (!turnstileToken) {
+      toast.error('Please complete the captcha verification');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -32,7 +39,8 @@ export default function SignUp() {
         email,
         password,
         options: {
-          data: { full_name: fullName } // saved in user_metadata
+          data: { full_name: fullName }, // saved in user_metadata
+          captchaToken: turnstileToken
         }
       });
 
@@ -163,11 +171,18 @@ export default function SignUp() {
               </p>
             </div>
 
+            <div className="flex justify-center">
+              <Turnstile
+                sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+                onVerify={(token) => setTurnstileToken(token)}
+              />
+            </div>
+
             <div>
               <button
                 type="submit"
-                disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+                disabled={loading || !turnstileToken}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Creating account...' : 'Sign up'}
               </button>
