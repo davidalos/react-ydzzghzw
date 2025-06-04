@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { supabase } from './supabase';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Turnstile from 'react-turnstile';
@@ -10,7 +9,8 @@ export default function SignUp() {
   const [fullName, setFullName] = useState('');
   const [role, setRole] = useState('employee');
   const [loading, setLoading] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState(null);
+  const [captchaToken, setCaptchaToken] = useState(null);
+
   const navigate = useNavigate();
 
   async function handleSignUp(e) {
@@ -26,63 +26,35 @@ export default function SignUp() {
       return;
     }
 
-    if (!turnstileToken) {
-      toast.error('Please complete the captcha verification');
+    if (!captchaToken) {
+      toast.error('Please verify the CAPTCHA');
       return;
     }
 
     setLoading(true);
 
     try {
-      // 1. Create the user in Supabase Auth
-      const { data: authData, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { full_name: fullName }, // saved in user_metadata
-          captchaToken: turnstileToken
-        }
+      const res = await fetch('/api/verify-turnstile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password,
+          token: captchaToken,
+          fullName,
+          role
+        })
       });
 
-      if (signUpError) {
-        if (signUpError.message === 'User already registered') {
-          toast('An account with this email already exists. Please sign in.', {
-            icon: '👋',
-            duration: 4000
-          });
-          navigate('/login');
-          return;
-        }
-        throw signUpError;
-      }
+      const data = await res.json();
 
-      if (!authData.user) {
-        throw new Error('Failed to create user');
-      }
-
-      // 2. Create the associated user profile
-      const { error: profileError } = await supabase
-        .from('user_profiles')
-        .insert([
-          {
-            id: authData.user.id,
-            full_name: fullName,
-            role: role
-          }
-        ])
-        .select()
-        .single();
-
-      if (profileError) {
-        await supabase.auth.signOut();
-        throw new Error('Failed to create user profile. Please try again.');
-      }
+      if (!res.ok) throw new Error(data.message || 'Signup failed');
 
       toast.success('Account created successfully! You can now sign in.');
       navigate('/login');
-    } catch (error) {
-      toast.error(error.message);
-      console.error('Sign-up error:', error);
+    } catch (err) {
+      console.error('Signup error:', err);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
@@ -112,7 +84,6 @@ export default function SignUp() {
                 id="email"
                 name="email"
                 type="email"
-                autoComplete="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -159,32 +130,26 @@ export default function SignUp() {
                 id="password"
                 name="password"
                 type="password"
-                autoComplete="new-password"
                 required
                 minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               />
-              <p className="mt-1 text-sm text-gray-500">
-                Password must be at least 6 characters long
-              </p>
             </div>
 
-            <div className="flex justify-center">
+            <div className="pt-2">
               <Turnstile
                 sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
-                onVerify={(token) => setTurnstileToken(token)}
-                onError={() => setTurnstileToken(null)}
-                onExpire={() => setTurnstileToken(null)}
+                onVerify={setCaptchaToken}
               />
             </div>
 
             <div>
               <button
                 type="submit"
-                disabled={loading || !turnstileToken || !email || !password || !fullName}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                disabled={loading}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
               >
                 {loading ? 'Creating account...' : 'Sign up'}
               </button>
