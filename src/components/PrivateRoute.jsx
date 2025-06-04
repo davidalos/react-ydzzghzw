@@ -21,7 +21,7 @@ export function PrivateRoute({ children, requireManager = false }) {
   }
 
   if (requireManager && !isManager) {
-    return <Navigate to="/unauthorized" replace />;
+    return <Navigate to="/unauthorized\" replace />;
   }
 
   return children;
