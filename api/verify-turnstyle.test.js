@@ -1,4 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+/* eslint-env node, jest */
+/* global process, global */
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import handler from './verify-turnstyle.js';
 
 // Simple helper to create mock response object

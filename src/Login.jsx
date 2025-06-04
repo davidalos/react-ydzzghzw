@@ -27,7 +27,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
         options: {
@@ -38,7 +38,7 @@ export default function Login() {
       if (error) throw error;
 
       toast.success('Welcome back!');
-      navigate('/atvik');
+      navigate('/');
 
     } catch (err) {
       console.error('Login error:', err);
