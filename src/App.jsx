@@ -75,11 +75,7 @@ function App() {
                         />
                         <Route
                           path="/yfirlit"
-                          element={
-                            <PrivateRoute requireManager>
-                              <ManagerDashboard />
-                            </PrivateRoute>
-                          }
+                          element={<ManagerDashboard />}
                         />
                       </Routes>
                     </div>

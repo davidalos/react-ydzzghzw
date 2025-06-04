@@ -1,10 +1,32 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 export default function Home() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="bg-white rounded-lg shadow-lg p-8">
         <h1 className="text-3xl font-bold mb-6">Velkomin/n í Atvikaskráningu Kópavogsbæjar</h1>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          <Link
+            to="/atvik"
+            className="h-24 flex items-center justify-center rounded-lg text-white text-lg font-medium bg-gradient-to-r from-indigo-500 to-purple-500 shadow hover:opacity-90"
+          >
+            Atvik
+          </Link>
+          <Link
+            to="/markmid"
+            className="h-24 flex items-center justify-center rounded-lg text-white text-lg font-medium bg-gradient-to-r from-indigo-500 to-purple-500 shadow hover:opacity-90"
+          >
+            Markmið
+          </Link>
+          <Link
+            to="/yfirlit"
+            className="h-24 flex items-center justify-center rounded-lg text-white text-lg font-medium bg-gradient-to-r from-indigo-500 to-purple-500 shadow hover:opacity-90"
+          >
+            Yfirlit
+          </Link>
+        </div>
         
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">Um kerfið</h2>

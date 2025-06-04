@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from './supabase';
 import { format } from 'date-fns';
-import toast from 'react-hot-toast';
 
 export default function IncidentDashboard() {
   const [incidents, setIncidents] = useState([]);
