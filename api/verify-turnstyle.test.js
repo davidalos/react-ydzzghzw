@@ -27,7 +27,13 @@ describe('verify-turnstyle API', () => {
   it('returns 200 on successful POST', async () => {
     const req = {
       method: 'POST',
-      body: { token: 'token', email: 'test@example.com', password: 'pw' }
+      body: {
+        token: 'token',
+        email: 'test@example.com',
+        password: 'pw',
+        fullName: 'Test User',
+        role: 'user'
+      }
     };
     const res = createRes();
 
@@ -46,6 +52,6 @@ describe('verify-turnstyle API', () => {
     await handler(req, res);
 
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({ message: 'Signup successful!' });
+    expect(res.json).toHaveBeenCalledWith({ message: 'Signup successful' });
   });
 });
