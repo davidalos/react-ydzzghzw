@@ -1,9 +1,9 @@
 // src/supabase.js
 import { createClient } from '@supabase/supabase-js';
 
-// Hardcoded here for Codespaces simplicity (but .env is still preferred)
-const supabaseUrl = 'https://kybhregztorltmcltjra.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5YmhyZWd6dG9ybHRtY2x0anJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NzU0ODgsImV4cCI6MjA2NDQ1MTQ4OH0.7ws71LmUKGJiFRmyepo2eTlQJ1Of7x8vZbksxvrUNoU';
+// Read credentials from environment variables
+const supabaseUrl = import.meta.env.SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY;
 
 // Fallback + error warning for environments like Vercel or Netlify
 if (!supabaseUrl || !supabaseAnonKey) {
