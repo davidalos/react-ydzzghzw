@@ -15,7 +15,7 @@ export default function Login() {
     e.preventDefault();
 
     if (!turnstileToken) {
-      toast.error('Please complete the CAPTCHA');
+      toast.error('Please complete the CAPTCHA verification');
       return;
     }
 
@@ -37,10 +37,7 @@ export default function Login() {
 
       if (error) throw error;
 
-      // Optional: You can fetch user role here if you want to use redirection logic
       toast.success('Welcome back!');
-
-      // Default redirection (customize as needed)
       navigate('/atvik');
 
     } catch (err) {
@@ -104,16 +101,18 @@ export default function Login() {
 
             <div className="flex justify-center">
               <Turnstile
-                sitekey="0x4AAAAAABf8GGR3DrgJYy7g"
-                onSuccess={(token) => setTurnstileToken(token)}
+                sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+                onVerify={(token) => setTurnstileToken(token)}
+                onError={() => setTurnstileToken(null)}
+                onExpire={() => setTurnstileToken(null)}
               />
             </div>
 
             <div>
               <button
                 type="submit"
-                disabled={loading || !turnstileToken}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400"
+                disabled={loading || !turnstileToken || !email || !password}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 {loading ? 'Signing in…' : 'Sign in'}
               </button>
