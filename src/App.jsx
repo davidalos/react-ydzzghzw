@@ -11,6 +11,7 @@ import IncidentDashboard from './IncidentDashboard.jsx';
 import GoalsDashboard from './GoalsDashboard.jsx';
 import GoalUpdateForm from './GoalUpdateForm.jsx';
 import GoalProgressChart from './GoalProgressChart.jsx';
+import Unauthorized from './Unauthorized.jsx';
 import { ManagerDashboard } from './components/ManagerDashboard.jsx';
 import { PrivateRoute } from './components/PrivateRoute.jsx';
 import { Navigation } from './components/Navigation.jsx';
@@ -40,6 +41,7 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
             <Route
               path="/*"
               element={
