@@ -25,10 +25,17 @@ export default function IncidentDashboard() {
       if (error) throw error;
 
       setIncidents(data || []);
+      localStorage.setItem('offlineIncidents', JSON.stringify(data || []));
       setErrorState(false);
     } catch (error) {
       console.error('🧨 Incident Load Error:', error.message || error);
-      setErrorState(true);
+      const offline = JSON.parse(localStorage.getItem('offlineIncidents') || '[]');
+      if (offline.length) {
+        setIncidents(offline);
+        setErrorState(false);
+      } else {
+        setErrorState(true);
+      }
     } finally {
       setLoading(false);
     }
