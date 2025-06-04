@@ -59,6 +59,14 @@ export default function IncidentForm() {
         throw new Error('Please fill in all required fields');
       }
 
+      // Convert co_staff string to UUID array
+      const coStaffArray = formData.coStaff
+        ? formData.coStaff
+            .split(',')
+            .map(s => s.trim())
+            .filter(Boolean)
+        : [];
+
       const { error } = await supabase.from('incidents').insert({
         client_id: formData.clientId,
         category: formData.category,
@@ -66,7 +74,7 @@ export default function IncidentForm() {
         reflection: formData.reflection,
         serious: formData.serious,
         submitted_by: user.id,
-        co_staff: formData.coStaff ? formData.coStaff.split(',').map(s => s.trim()) : [],
+        co_staff: coStaffArray,
       });
 
       if (error) throw error;
@@ -167,7 +175,7 @@ export default function IncidentForm() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Samstarfsmenn
+            Samstarfsmenn (UUID)
           </label>
           <input
             type="text"
@@ -175,8 +183,11 @@ export default function IncidentForm() {
             value={formData.coStaff}
             onChange={handleInputChange}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            placeholder="Nöfn aðskilin með kommu (t.d. Anna, Björn)"
+            placeholder="UUID aðskilin með kommu"
           />
+          <p className="mt-1 text-sm text-gray-500">
+            Enter valid UUIDs separated by commas
+          </p>
         </div>
 
         <div className="flex items-center">
