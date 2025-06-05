@@ -20,6 +20,17 @@ npm run dev
 
 The app will be available at `http://localhost:5173` by default.
 
+### Running on StackBlitz
+
+When using StackBlitz, first install dependencies and then start the development server:
+
+```bash
+npm install
+npm start
+```
+
+`npm start` launches Vite in development mode. Environment variables can be provided in a `.env` file or set through the StackBlitz UI.
+
 ### Running Tests
 
 Unit tests are written with [Vitest](https://vitest.dev/). To execute the test suite once, run:
