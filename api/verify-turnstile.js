@@ -53,5 +53,24 @@ export default async function handler(req, res) {
     return res.status(400).json({ message: signupJson.error.message });
   }
 
+  // 3. Update user profile with provided full name and role
+  try {
+    const userId = signupJson.user?.id;
+    if (userId) {
+      await fetch(`${SUPABASE_URL}/rest/v1/user_profiles?id=eq.${userId}`, {
+        method: 'PATCH',
+        headers: {
+          apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=representation'
+        },
+        body: JSON.stringify({ full_name: fullName, role })
+      });
+    }
+  } catch (err) {
+    console.error('Failed to update user profile:', err);
+  }
+
   return res.status(200).json({ message: 'Signup successful', user: signupJson.user });
 }
