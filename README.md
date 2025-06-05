@@ -55,6 +55,19 @@ npm test
 
 The project is configured for deployment on Vercel. Environment variables for Supabase and Turnstile should be set in the Vercel dashboard.
 
+### Required Environment Variables
+
+| Name | Purpose |
+| --- | --- |
+| `VITE_SUPABASE_URL` | Supabase project URL (client) |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anon key (client) |
+| `SUPABASE_URL` | Supabase project URL for serverless functions |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role key used by the signup API |
+| `VITE_TURNSTILE_SITE_KEY` | Cloudflare Turnstile site key |
+| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile secret key |
+
+When running on StackBlitz or locally, place these values in a `.env` file. On Vercel set them in your project settings.
+
 ## License
 
 MIT

@@ -27,7 +27,13 @@ export default async function handler(req, res) {
   }
 
   // 2. Supabase sign-up via service key
-  const signupRes = await fetch(`${process.env.SUPABASE_URL}/auth/v1/signup`, {
+  const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  if (!SUPABASE_URL) {
+    console.error('Missing SUPABASE_URL environment variable');
+    return res.status(500).json({ message: 'Server misconfiguration' });
+  }
+
+  const signupRes = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
     method: 'POST',
     headers: {
       apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
