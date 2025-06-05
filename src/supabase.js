@@ -2,8 +2,14 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Read credentials from environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Support both Vite (`VITE_*`) and Next.js (`NEXT_PUBLIC_*`) prefixes so the
+// same build can run in different environments without changes.
+const supabaseUrl =
+  import.meta.env.VITE_SUPABASE_URL ||
+  import.meta.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey =
+  import.meta.env.VITE_SUPABASE_ANON_KEY ||
+  import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 // Fallback + error warning for environments like Vercel or Netlify
 if (!supabaseUrl || !supabaseAnonKey) {
