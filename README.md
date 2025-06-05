@@ -66,6 +66,10 @@ The project is configured for deployment on Vercel. Environment variables for Su
 | `VITE_TURNSTILE_SITE_KEY` | Cloudflare Turnstile site key |
 | `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile secret key |
 
+Both Vite (`VITE_`) and Next.js (`NEXT_PUBLIC_`) prefixes are supported for the
+Supabase credentials. Pick the prefix that matches your build tooling and keep
+the same values across environments.
+
 When running on StackBlitz or locally, place these values in a `.env` file. On Vercel set them in your project settings.
 
 ## License
