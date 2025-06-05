@@ -44,6 +44,9 @@ describe('verify-turnstyle API', () => {
         json: vi.fn().mockResolvedValue({ success: true })
       })
       .mockResolvedValueOnce({
+        json: vi.fn().mockResolvedValue({ user: { id: '123' } })
+      })
+      .mockResolvedValueOnce({
         json: vi.fn().mockResolvedValue({})
       });
 
@@ -53,7 +56,11 @@ describe('verify-turnstyle API', () => {
 
     await handler(req, res);
 
+    expect(global.fetch).toHaveBeenCalledTimes(3);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({ message: 'Signup successful' });
+    expect(res.json).toHaveBeenCalledWith({
+      message: 'Signup successful',
+      user: { id: '123' }
+    });
   });
 });
