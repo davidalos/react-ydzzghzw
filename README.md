@@ -51,6 +51,10 @@ npm test
 - `api/` – Serverless functions used in development and on Vercel
 - `supabase/` – Supabase migrations and seed scripts
 
+### Database Schema
+
+Supabase migrations create tables such as `user_profiles`, `clients`, `incidents`, `goals` and `goal_updates`. A new table `user_roles` mirrors the role of each profile and is kept in sync via a trigger so policies can safely reference it.
+
 ## Deployment
 
 The project is configured for deployment on Vercel. Environment variables for Supabase and Turnstile should be set in the Vercel dashboard.
