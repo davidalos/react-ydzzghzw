@@ -22,12 +22,20 @@ CREATE TABLE IF NOT EXISTS role_change_log (
 );
 
 -- Create temporary table to store co_staff data
-CREATE TEMPORARY TABLE temp_incidents AS 
+CREATE TEMPORARY TABLE temp_incidents AS
 SELECT id, co_staff FROM incidents;
 
 -- Modify co_staff to be UUID array
 ALTER TABLE incidents DROP COLUMN co_staff;
 ALTER TABLE incidents ADD COLUMN co_staff uuid[] DEFAULT '{}';
+
+-- Restore previous co_staff values
+UPDATE incidents i
+SET co_staff = t.co_staff::uuid[]
+FROM temp_incidents t
+WHERE i.id = t.id;
+
+DROP TABLE temp_incidents;
 
 -- Add index for co_staff array
 CREATE INDEX IF NOT EXISTS idx_incidents_co_staff ON incidents USING gin(co_staff);

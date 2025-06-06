@@ -19,6 +19,14 @@ CREATE TEMPORARY TABLE temp_incidents AS SELECT id, co_staff FROM incidents;
 ALTER TABLE incidents DROP COLUMN co_staff;
 ALTER TABLE incidents ADD COLUMN co_staff uuid[];
 
+-- Migrate data back into the new column
+UPDATE incidents i
+SET co_staff = t.co_staff::uuid[]
+FROM temp_incidents t
+WHERE i.id = t.id;
+
+DROP TABLE temp_incidents;
+
 -- Update the employees policy to handle UUID comparison correctly
 DROP POLICY IF EXISTS "Employees can view assigned incidents" ON incidents;
 CREATE POLICY "Employees can view assigned incidents"
