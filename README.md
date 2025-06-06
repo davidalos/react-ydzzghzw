@@ -72,6 +72,16 @@ the same values across environments.
 
 When running on StackBlitz or locally, place these values in a `.env` file. On Vercel set them in your project settings.
 
+## GitHub + Supabase Auto-Sync
+
+Run `scripts/setupAutoSync.sh` to initialize Supabase and configure a `post-merge`
+git hook that fetches the latest `main` branch and applies migrations
+automatically. Edit `YOUR_PROJECT_REF` inside the script before running it:
+
+```bash
+bash scripts/setupAutoSync.sh
+```
+
 ## License
 
 MIT
