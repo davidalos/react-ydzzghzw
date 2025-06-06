@@ -17,19 +17,33 @@
 */
 
 -- Drop all existing policies first
-DO $$ 
+DO $$
 BEGIN
-  DROP POLICY IF EXISTS "Users can read own profile" ON public.user_profiles;
-  DROP POLICY IF EXISTS "user_profile_self_update_v3" ON public.user_profiles;
-  DROP POLICY IF EXISTS "manager_profile_update_v3" ON public.user_profiles;
-  DROP POLICY IF EXISTS "All authenticated users can read clients" ON public.clients;
-  DROP POLICY IF EXISTS "Users can create incidents" ON public.incidents;
-  DROP POLICY IF EXISTS "Users can read own incidents" ON public.incidents;
-  DROP POLICY IF EXISTS "All authenticated users can read goals" ON public.goals;
-  DROP POLICY IF EXISTS "Users can create goals" ON public.goals;
-  DROP POLICY IF EXISTS "Users can update own goals" ON public.goals;
-  DROP POLICY IF EXISTS "All authenticated users can read goal updates" ON public.goal_updates;
-  DROP POLICY IF EXISTS "Users can create goal updates" ON public.goal_updates;
+  IF to_regclass('public.user_profiles') IS NOT NULL THEN
+    DROP POLICY IF EXISTS "Users can read own profile" ON public.user_profiles;
+    DROP POLICY IF EXISTS "user_profile_self_update_v3" ON public.user_profiles;
+    DROP POLICY IF EXISTS "manager_profile_update_v3" ON public.user_profiles;
+  END IF;
+
+  IF to_regclass('public.clients') IS NOT NULL THEN
+    DROP POLICY IF EXISTS "All authenticated users can read clients" ON public.clients;
+  END IF;
+
+  IF to_regclass('public.incidents') IS NOT NULL THEN
+    DROP POLICY IF EXISTS "Users can create incidents" ON public.incidents;
+    DROP POLICY IF EXISTS "Users can read own incidents" ON public.incidents;
+  END IF;
+
+  IF to_regclass('public.goals') IS NOT NULL THEN
+    DROP POLICY IF EXISTS "All authenticated users can read goals" ON public.goals;
+    DROP POLICY IF EXISTS "Users can create goals" ON public.goals;
+    DROP POLICY IF EXISTS "Users can update own goals" ON public.goals;
+  END IF;
+
+  IF to_regclass('public.goal_updates') IS NOT NULL THEN
+    DROP POLICY IF EXISTS "All authenticated users can read goal updates" ON public.goal_updates;
+    DROP POLICY IF EXISTS "Users can create goal updates" ON public.goal_updates;
+  END IF;
 END $$;
 
 -- Create user_profiles table
