@@ -45,9 +45,6 @@ ALTER POLICY "Users can read own incidents"
     )
   );
 
-ALTER POLICY "User can read own role" 
-  ON public.user_roles
-  USING (auth.role() = 'authenticated' AND auth.uid() = id);
 
 -- Add explicit INSERT policies with authentication checks
 ALTER POLICY "Users can create incidents" 
