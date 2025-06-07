@@ -13,7 +13,8 @@ export function TurnstileWrapper({ onVerify, onError, onExpire }) {
                   hostname.includes('bolt.new') || 
                   hostname.includes('stackblitz') ||
                   hostname.includes('webcontainer') ||
-                  process.env.NODE_ENV === 'development';
+                  process.env.NODE_ENV === 'development' ||
+                  import.meta.env.DEV;
     
     if (isDev) {
       // Use Cloudflare's test site key for development
@@ -39,9 +40,9 @@ export function TurnstileWrapper({ onVerify, onError, onExpire }) {
 
   const handleVerify = (token) => {
     if (!isProduction) {
-      // In development, always return a dummy token
+      // In development, always return a dummy token that matches Login.jsx expectations
       console.log('🔧 Dev mode: Using dummy CAPTCHA token');
-      onVerify('XXXX.DUMMY.TOKEN.XXXX');
+      onVerify('dummy-token-for-development');
     } else {
       console.log('✅ CAPTCHA verified successfully');
       onVerify(token);
@@ -53,7 +54,7 @@ export function TurnstileWrapper({ onVerify, onError, onExpire }) {
     if (!isProduction) {
       // In development, simulate successful verification even on error
       console.log('🔧 Dev mode: Bypassing CAPTCHA error');
-      onVerify('XXXX.DUMMY.TOKEN.XXXX');
+      onVerify('dummy-token-for-development');
     } else {
       onError && onError();
     }
@@ -63,7 +64,7 @@ export function TurnstileWrapper({ onVerify, onError, onExpire }) {
     console.log('⏰ CAPTCHA expired');
     if (!isProduction) {
       // In development, auto-renew with dummy token
-      onVerify('XXXX.DUMMY.TOKEN.XXXX');
+      onVerify('dummy-token-for-development');
     } else {
       onExpire && onExpire();
     }
