@@ -59,7 +59,7 @@ export default function IncidentForm() {
         throw new Error('Please fill in all required fields');
       }
 
-      // Convert co_staff string to UUID array
+      // Convert co_staff string to array of UUIDs (if provided)
       const coStaffArray = formData.coStaff
         ? formData.coStaff
             .split(',')
@@ -74,7 +74,7 @@ export default function IncidentForm() {
         reflection: formData.reflection,
         serious: formData.serious,
         submitted_by: user.id,
-        co_staff: coStaffArray,
+        co_staff: coStaffArray, // Store as JSONB array
       });
 
       if (error) throw error;
@@ -92,6 +92,7 @@ export default function IncidentForm() {
         reflection: formData.reflection,
         serious: formData.serious,
         submitted_by: user.id,
+        co_staff: coStaffArray,
         user_profiles: { full_name: profile?.full_name || '' }
       });
       localStorage.setItem('offlineIncidents', JSON.stringify(offline));
@@ -201,7 +202,7 @@ export default function IncidentForm() {
             placeholder="UUID aðskilin með kommu"
           />
           <p className="mt-1 text-sm text-gray-500">
-            Enter valid UUIDs separated by commas
+            Enter valid UUIDs separated by commas (optional)
           </p>
         </div>
 
@@ -222,7 +223,7 @@ export default function IncidentForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             {loading ? 'Skrái...' : 'Skrá atvik'}
           </button>
