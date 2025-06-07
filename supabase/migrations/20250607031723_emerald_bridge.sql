@@ -1,16 +1,21 @@
 /*
-  # Seed Sample Data for Atvikaskráning
+  # Create Sample Data for Dashboard
 
-  1. Sample Data
-    - Creates 6 sample clients (Íbúar 1-6)
-    - Adds 15 varied incidents across all categories
-    - Creates 6 goals with different statuses
-    - Adds goal updates showing progress tracking
+  1. New Tables
+    - Ensures clients exist for testing
+    - Creates sample incidents and goals
+    - Adds goal updates for progress tracking
 
-  2. Data Safety
-    - Uses conditional inserts to avoid duplicates
-    - Creates realistic sample data in Icelandic
-    - Maintains referential integrity
+  2. Security
+    - Only creates data if users exist
+    - Uses existing user profiles for data ownership
+    - Respects existing data (no duplicates)
+
+  3. Changes
+    - Adds 6 sample clients (Íbúi 1-6)
+    - Creates 15 sample incidents across different categories
+    - Adds 6 sample goals with various statuses
+    - Includes goal updates showing progress types
 */
 
 -- Insert sample clients if they don't exist
@@ -23,30 +28,28 @@ BEGIN
   
   -- Only insert if we have fewer than 6 clients
   IF client_count < 6 THEN
-    -- Insert clients that don't exist
+    -- Insert each client individually to avoid SQL issues
     INSERT INTO clients (label) 
-    SELECT unnest(ARRAY['Íbúi 1', 'Íbúi 2', 'Íbúi 3', 'Íbúi 4', 'Íbúi 5', 'Íbúi 6'])
-    WHERE NOT EXISTS (
-      SELECT 1 FROM clients WHERE label = unnest(ARRAY['Íbúi 1', 'Íbúi 2', 'Íbúi 3', 'Íbúi 4', 'Íbúi 5', 'Íbúi 6'])
-    );
-  END IF;
-END $$;
-
--- Create sample user profile if it doesn't exist
-DO $$
-DECLARE
-  sample_user_id uuid := '00000000-0000-0000-0000-000000000001';
-  user_exists boolean;
-BEGIN
-  -- Check if sample user exists in auth.users (we can't insert there directly)
-  -- Instead, we'll use the first real user or create a placeholder
-  SELECT EXISTS(SELECT 1 FROM user_profiles LIMIT 1) INTO user_exists;
-  
-  -- If no users exist, we'll skip the data seeding for now
-  -- This will be populated when real users sign up
-  IF NOT user_exists THEN
-    RAISE NOTICE 'No users found - sample data will be created when users sign up';
-    RETURN;
+    SELECT 'Íbúi 1' WHERE NOT EXISTS (SELECT 1 FROM clients WHERE label = 'Íbúi 1');
+    
+    INSERT INTO clients (label) 
+    SELECT 'Íbúi 2' WHERE NOT EXISTS (SELECT 1 FROM clients WHERE label = 'Íbúi 2');
+    
+    INSERT INTO clients (label) 
+    SELECT 'Íbúi 3' WHERE NOT EXISTS (SELECT 1 FROM clients WHERE label = 'Íbúi 3');
+    
+    INSERT INTO clients (label) 
+    SELECT 'Íbúi 4' WHERE NOT EXISTS (SELECT 1 FROM clients WHERE label = 'Íbúi 4');
+    
+    INSERT INTO clients (label) 
+    SELECT 'Íbúi 5' WHERE NOT EXISTS (SELECT 1 FROM clients WHERE label = 'Íbúi 5');
+    
+    INSERT INTO clients (label) 
+    SELECT 'Íbúi 6' WHERE NOT EXISTS (SELECT 1 FROM clients WHERE label = 'Íbúi 6');
+    
+    RAISE NOTICE 'Sample clients created successfully';
+  ELSE
+    RAISE NOTICE 'Clients already exist, skipping client creation';
   END IF;
 END $$;
 
@@ -62,16 +65,20 @@ DECLARE
   sample_user_id uuid;
   incident_count integer;
   goal_count integer;
+  user_count integer;
 BEGIN
-  -- Get the first available user
-  SELECT id INTO sample_user_id FROM user_profiles LIMIT 1;
+  -- Check if we have any users
+  SELECT COUNT(*) INTO user_count FROM user_profiles;
   
   -- If no users exist, skip seeding
-  IF sample_user_id IS NULL THEN
-    RAISE NOTICE 'No user profiles found - skipping sample data creation';
+  IF user_count = 0 THEN
+    RAISE NOTICE 'No user profiles found - skipping sample data creation. Data will be created when users sign up.';
     RETURN;
   END IF;
 
+  -- Get the first available user
+  SELECT id INTO sample_user_id FROM user_profiles LIMIT 1;
+  
   -- Get client IDs
   SELECT id INTO client1_id FROM clients WHERE label = 'Íbúi 1' LIMIT 1;
   SELECT id INTO client2_id FROM clients WHERE label = 'Íbúi 2' LIMIT 1;
@@ -102,6 +109,10 @@ BEGIN
       (client2_id, sample_user_id, 'Behavioral', 'Jákvæð hegðunarbreyting', false, NOW() - INTERVAL '13 days'),
       (client6_id, sample_user_id, 'Medical', 'Regluleg heilsufarsskoðun', false, NOW() - INTERVAL '14 days'),
       (client3_id, sample_user_id, 'Positive Progress', 'Náði persónulegu markmiði', false, NOW() - INTERVAL '15 days');
+    
+    RAISE NOTICE 'Sample incidents created successfully';
+  ELSE
+    RAISE NOTICE 'Incidents already exist, skipping incident creation';
   END IF;
 
   -- Check if we already have sample goals
@@ -117,6 +128,8 @@ BEGIN
       (client4_id, sample_user_id, 'Líkamsrækt og heilsa', 'Viðhalda reglulegri líkamsrækt', 'completed', NOW() - INTERVAL '45 days'),
       (client5_id, sample_user_id, 'Læsi og skrift', 'Bæta lestrar- og skriftarhæfni', 'active', NOW() - INTERVAL '35 days'),
       (client6_id, sample_user_id, 'Tækninotkun', 'Læra að nota tölvu og spjaldtölvu', 'active', NOW() - INTERVAL '15 days');
+
+    RAISE NOTICE 'Sample goals created successfully';
 
     -- Insert sample goal updates for active goals
     INSERT INTO goal_updates (goal_id, created_by, update_text, progress_type, created_at)
@@ -160,7 +173,11 @@ BEGIN
     FROM goals g
     WHERE g.status = 'active' AND g.created_by = sample_user_id
     LIMIT 3;
+
+    RAISE NOTICE 'Sample goal updates created successfully';
+  ELSE
+    RAISE NOTICE 'Goals already exist, skipping goal creation';
   END IF;
 
-  RAISE NOTICE 'Sample data seeding completed successfully';
+  RAISE NOTICE 'Sample data seeding completed successfully for user: %', sample_user_id;
 END $$;
