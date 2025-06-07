@@ -29,22 +29,21 @@ export default function Login() {
     try {
       console.log('🔄 Attempting login with:', { email, hasPassword: !!password, hasToken: !!turnstileToken });
       
-      // Prepare login options - conditionally include captcha token
+      // Prepare login options - include captcha token
       const loginOptions = {
         email: email.toLowerCase().trim(),
         password,
       };
 
-      // TEMPORARILY DISABLED: CAPTCHA verification for login
-      // Only include captcha token if not in development or if it's not the dummy token
-      // const isDevelopment = import.meta.env.DEV;
-      // const isDummyToken = turnstileToken === 'dummy-token-for-development';
+      // Include captcha token for verification
+      const isDevelopment = import.meta.env.DEV;
+      const isDummyToken = turnstileToken === 'dummy-token-for-development';
       
-      // if (!isDevelopment || !isDummyToken) {
-      //   loginOptions.options = {
-      //     captchaToken: turnstileToken
-      //   };
-      // }
+      if (!isDevelopment || !isDummyToken) {
+        loginOptions.options = {
+          captchaToken: turnstileToken
+        };
+      }
 
       // Enhanced login with better error handling
       const { data, error } = await supabase.auth.signInWithPassword(loginOptions);
