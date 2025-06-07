@@ -24,6 +24,7 @@ export default async function handler(req, res) {
   const isDevelopment = process.env.NODE_ENV === 'development' || 
                        process.env.VERCEL_ENV === 'development' ||
                        token === 'XXXX.DUMMY.TOKEN.XXXX' ||
+                       token.startsWith('c_') || // Cloudflare test tokens
                        process.env.TURNSTILE_SECRET_KEY === '1x0000000000000000000000000000000AA' ||
                        !process.env.TURNSTILE_SECRET_KEY ||
                        process.env.TURNSTILE_SECRET_KEY === 'undefined';
