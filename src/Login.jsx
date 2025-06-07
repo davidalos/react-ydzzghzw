@@ -35,15 +35,16 @@ export default function Login() {
         password,
       };
 
+      // TEMPORARILY DISABLED: CAPTCHA verification for login
       // Only include captcha token if not in development or if it's not the dummy token
-      const isDevelopment = import.meta.env.DEV;
-      const isDummyToken = turnstileToken === 'dummy-token-for-development';
+      // const isDevelopment = import.meta.env.DEV;
+      // const isDummyToken = turnstileToken === 'dummy-token-for-development';
       
-      if (!isDevelopment || !isDummyToken) {
-        loginOptions.options = {
-          captchaToken: turnstileToken
-        };
-      }
+      // if (!isDevelopment || !isDummyToken) {
+      //   loginOptions.options = {
+      //     captchaToken: turnstileToken
+      //   };
+      // }
 
       // Enhanced login with better error handling
       const { data, error } = await supabase.auth.signInWithPassword(loginOptions);
