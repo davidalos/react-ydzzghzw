@@ -1,0 +1,70 @@
+# KEYBRIDGE Platform Configuration
+name: "atvikaskraning-kopavogur"
+version: "1.0.0"
+
+# Build settings
+build:
+  command: "npm run build"
+  output: "dist"
+  install: "npm install"
+
+# Development settings
+dev:
+  command: "npm run dev"
+  port: 5173
+  
+# Environment configuration
+env:
+  development:
+    - VITE_SUPABASE_URL
+    - VITE_SUPABASE_ANON_KEY
+    - VITE_TURNSTILE_SITE_KEY
+    - NODE_ENV=development
+  
+  production:
+    - VITE_SUPABASE_URL
+    - VITE_SUPABASE_ANON_KEY
+    - VITE_TURNSTILE_SITE_KEY
+    - NODE_ENV=production
+
+# File ignore patterns
+ignore:
+  - node_modules
+  - .env
+  - .git
+  - dist
+  - build
+  - coverage
+  - .vscode
+  - .idea
+  - backups
+  - *.log
+  - *.tmp
+
+# Platform integrations
+integrations:
+  supabase:
+    project_ref: "kybhregztorltmcltjra"
+    local_port: 54321
+  
+  vercel:
+    framework: "vite"
+    build_command: "npm run build"
+    output_directory: "dist"
+  
+  github:
+    auto_deploy: true
+    branch: "main"
+
+# Security settings
+security:
+  rls_enabled: true
+  captcha_enabled: true
+  audit_logging: true
+  gdpr_compliant: true
+
+# Performance settings
+performance:
+  cache_static_assets: true
+  compress_responses: true
+  lazy_load_components: true

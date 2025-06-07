@@ -1,11 +1,8 @@
 # Dependencies
 node_modules/
-/.pnp
-.pnp.js
-
-# Production builds
-/build
-/dist
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Environment variables
 .env
@@ -14,27 +11,43 @@ node_modules/
 .env.test.local
 .env.production.local
 
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Development
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
 # Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
+logs/
+*.log
 
 # Runtime data
-pids
+pids/
 *.pid
 *.seed
 *.pid.lock
 
 # Coverage directory used by tools like istanbul
 coverage/
-*.lcov
-
-# nyc test coverage
-.nyc_output
+.nyc_output/
 
 # Dependency directories
-node_modules/
 jspm_packages/
 
 # Optional npm cache directory
@@ -62,45 +75,12 @@ jspm_packages/
 .cache
 .parcel-cache
 
-# Next.js build output
-.next
-
-# Nuxt.js build / generate output
-.nuxt
-dist
-
-# Gatsby files
-.cache/
-public
-
-# Storybook build outputs
-.out
-.storybook-out
-
-# Temporary folders
-tmp/
-temp/
-
-# Editor directories and files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
 
 # Supabase
 .branches
 .temp
-.import
 supabase/.temp
 
 # Backups
@@ -110,4 +90,5 @@ backups/
 
 # KEYBRIDGE specific
 .keybridge/
-*.keybridge.lock
+temp/
+*.tmp

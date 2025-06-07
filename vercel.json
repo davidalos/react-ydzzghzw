@@ -6,7 +6,8 @@
   "env": {
     "VITE_SUPABASE_URL": "@vite_supabase_url",
     "VITE_SUPABASE_ANON_KEY": "@vite_supabase_anon_key",
-    "VITE_TURNSTILE_SITE_KEY": "@vite_turnstile_site_key"
+    "VITE_TURNSTILE_SITE_KEY": "@vite_turnstile_site_key",
+    "NODE_ENV": "production"
   },
   "build": {
     "env": {
@@ -17,7 +18,8 @@
   },
   "functions": {
     "api/verify-turnstile.js": {
-      "runtime": "nodejs18.x"
+      "runtime": "nodejs18.x",
+      "maxDuration": 30
     }
   },
   "rewrites": [
@@ -45,6 +47,10 @@
         {
           "key": "Access-Control-Allow-Headers",
           "value": "Content-Type, Authorization"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
         }
       ]
     }
