@@ -34,7 +34,10 @@ function App() {
   const { loading } = useAuth();
   const { hasAcceptedPrivacy, showPrivacyNotice, acceptPrivacy, declinePrivacy } = useDataPrivacy();
 
-  if (loading) {
+  // TEMPORARY BYPASS: Skip loading check
+  const TEMP_BYPASS = true;
+  
+  if (loading && !TEMP_BYPASS) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -49,6 +52,15 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <Toaster position="top-right" />
+        
+        {/* TEMPORARY BYPASS NOTICE */}
+        {TEMP_BYPASS && (
+          <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 text-center">
+            <p className="font-bold">🚨 TEMPORARY AUTH BYPASS ACTIVE</p>
+            <p className="text-sm">Authentication is disabled for testing. Remove this in production!</p>
+          </div>
+        )}
+        
         <div className="min-h-screen bg-gray-50">
           <Routes>
             <Route path="/login" element={<Login />} />
@@ -100,7 +112,7 @@ function App() {
         
         {/* Data Privacy Notice */}
         <DataPrivacyNotice
-          isVisible={showPrivacyNotice}
+          isVisible={showPrivacyNotice && !TEMP_BYPASS}
           onAccept={acceptPrivacy}
           onDecline={declinePrivacy}
         />

@@ -10,12 +10,35 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // TEMPORARY BYPASS: Create mock user and profile
+  const TEMP_BYPASS = true;
+  
   useEffect(() => {
     let mounted = true;
 
     async function fetchSession() {
       try {
         setError(null);
+        
+        // TEMPORARY BYPASS: Use mock data
+        if (TEMP_BYPASS) {
+          console.log('🚨 TEMPORARY AUTH BYPASS ACTIVE - Using mock user data');
+          if (mounted) {
+            setUser({ 
+              id: 'temp-user-id', 
+              email: 'temp@example.com',
+              user_metadata: { full_name: 'Temporary User' }
+            });
+            setProfile({ 
+              id: 'temp-user-id',
+              full_name: 'Temporary User', 
+              role: 'manager' // Give manager access for testing
+            });
+            setLoading(false);
+          }
+          return;
+        }
+
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         if (sessionError) throw sessionError;
         if (!mounted) return;
@@ -56,6 +79,10 @@ export function AuthProvider({ children }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!mounted) return;
+      
+      // Skip auth state changes during bypass
+      if (TEMP_BYPASS) return;
+      
       try {
         setLoading(true);
         setError(null);
@@ -91,7 +118,7 @@ export function AuthProvider({ children }) {
     });
 
     function handleVisibility() {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === 'visible' && !TEMP_BYPASS) {
         fetchSession();
       }
     }
