@@ -3,6 +3,23 @@
   "installCommand": "npm install",
   "outputDirectory": "dist",
   "framework": "vite",
+  "env": {
+    "VITE_SUPABASE_URL": "@vite_supabase_url",
+    "VITE_SUPABASE_ANON_KEY": "@vite_supabase_anon_key",
+    "VITE_TURNSTILE_SITE_KEY": "@vite_turnstile_site_key"
+  },
+  "build": {
+    "env": {
+      "SUPABASE_URL": "@supabase_url",
+      "SUPABASE_SERVICE_ROLE_KEY": "@supabase_service_role_key",
+      "TURNSTILE_SECRET_KEY": "@turnstile_secret_key"
+    }
+  },
+  "functions": {
+    "api/verify-turnstile.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -13,11 +30,23 @@
       "destination": "/index.html"
     }
   ],
-  "redirects": [
+  "headers": [
     {
-      "source": "/old-route",
-      "destination": "/new-route",
-      "permanent": true
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
+      ]
     }
   ]
 }

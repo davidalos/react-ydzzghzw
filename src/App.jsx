@@ -16,12 +16,23 @@ import { ManagerDashboard } from './components/ManagerDashboard.jsx';
 import Yfirlit from './Yfirlit.jsx';
 import { PrivateRoute } from './components/PrivateRoute.jsx';
 import { Navigation } from './components/Navigation.jsx';
+import { DataPrivacyNotice } from './components/DataPrivacyNotice.jsx';
 import { useAuth } from './hooks/useAuth';
+import { useDataPrivacy } from './hooks/useDataPrivacy';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 3,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      cacheTime: 10 * 60 * 1000, // 10 minutes
+    },
+  },
+});
 
 function App() {
   const { loading } = useAuth();
+  const { hasAcceptedPrivacy, showPrivacyNotice, acceptPrivacy, declinePrivacy } = useDataPrivacy();
 
   if (loading) {
     return (
@@ -86,6 +97,13 @@ function App() {
             />
           </Routes>
         </div>
+        
+        {/* Data Privacy Notice */}
+        <DataPrivacyNotice
+          isVisible={showPrivacyNotice}
+          onAccept={acceptPrivacy}
+          onDecline={declinePrivacy}
+        />
       </Router>
     </QueryClientProvider>
   );
