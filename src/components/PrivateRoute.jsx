@@ -20,9 +20,8 @@ export function PrivateRoute({ children, requireManager = false }) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (requireManager && !isManager) {
-    return <Navigate to="/unauthorized" replace />;
-  }
+  // Note: Removed manager requirement check - all authenticated users can access all pages
+  // This allows everyone to see the Yfirlit (Overview) page
 
   return children;
 }
