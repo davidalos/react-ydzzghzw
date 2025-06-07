@@ -57,20 +57,49 @@ The project is configured for deployment on Vercel. Environment variables for Su
 
 ### Required Environment Variables
 
-| Name | Purpose |
-| --- | --- |
-| `VITE_SUPABASE_URL` | Supabase project URL (client) |
-| `VITE_SUPABASE_ANON_KEY` | Supabase anon key (client) |
-| `SUPABASE_URL` | Supabase project URL for serverless functions |
-| `SUPABASE_SERVICE_ROLE_KEY` | Service role key used by the signup API |
-| `VITE_TURNSTILE_SITE_KEY` | Cloudflare Turnstile site key |
-| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile secret key |
+| Name | Purpose | Example Value |
+| --- | --- | --- |
+| `VITE_SUPABASE_URL` | Supabase project URL (client) | `https://kybhregztorltmcltjra.supabase.co` |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anon key (client) | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` |
+| `SUPABASE_URL` | Supabase project URL for serverless functions | `https://kybhregztorltmcltjra.supabase.co` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role key used by the signup API | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` |
+| `VITE_TURNSTILE_SITE_KEY` | Cloudflare Turnstile site key | `0x4AAAAAABf8GGR3DrgJYy7g` |
+| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile secret key | `0x4AAAAAABf8GBb27IJHtqpE9FfZdp-DRNU` |
 
 Both Vite (`VITE_`) and Next.js (`NEXT_PUBLIC_`) prefixes are supported for the
 Supabase credentials. Pick the prefix that matches your build tooling and keep
 the same values across environments.
 
 When running on StackBlitz or locally, place these values in a `.env` file. On Vercel set them in your project settings.
+
+### Setting up Supabase CLI
+
+To work with migrations and database schema:
+
+1. **Install Supabase CLI** (if not already installed):
+   ```bash
+   npm install -g supabase
+   ```
+
+2. **Login to Supabase**:
+   ```bash
+   supabase login
+   ```
+
+3. **Link your project**:
+   ```bash
+   supabase link --project-ref kybhregztorltmcltjra
+   ```
+
+4. **Push migrations to database**:
+   ```bash
+   supabase db push
+   ```
+
+5. **Generate TypeScript types**:
+   ```bash
+   supabase gen types typescript --local > src/types/database.ts
+   ```
 
 ## License
 
