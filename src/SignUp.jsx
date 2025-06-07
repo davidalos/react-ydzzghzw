@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import Turnstile from 'react-turnstile';
+import { TurnstileWrapper } from './components/TurnstileWrapper';
 
 export default function SignUp() {
   const [email, setEmail] = useState('');
@@ -138,12 +138,11 @@ export default function SignUp() {
               />
             </div>
 
-            <div className="pt-2">
-              <Turnstile
-                sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
-                onVerify={setCaptchaToken}
-              />
-            </div>
+            <TurnstileWrapper
+              onVerify={setCaptchaToken}
+              onError={() => setCaptchaToken(null)}
+              onExpire={() => setCaptchaToken(null)}
+            />
 
             <div>
               <button

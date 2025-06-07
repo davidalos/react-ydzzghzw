@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { supabase } from './supabase';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import Turnstile from 'react-turnstile';
+import { TurnstileWrapper } from './components/TurnstileWrapper';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -99,14 +99,11 @@ export default function Login() {
               </p>
             </div>
 
-            <div className="flex justify-center">
-              <Turnstile
-                sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
-                onVerify={(token) => setTurnstileToken(token)}
-                onError={() => setTurnstileToken(null)}
-                onExpire={() => setTurnstileToken(null)}
-              />
-            </div>
+            <TurnstileWrapper
+              onVerify={(token) => setTurnstileToken(token)}
+              onError={() => setTurnstileToken(null)}
+              onExpire={() => setTurnstileToken(null)}
+            />
 
             <div>
               <button
