@@ -11,39 +11,7 @@ export default function Login() {
   const [captchaToken, setCaptchaToken] = useState(null);
   const navigate = useNavigate();
 
-  const handleLogin = async (email, password, captchaToken) => {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-        options: {
-          captchaToken, // <-- add this
-        },
-      });
-
-      if (error) throw error;
-      console.log("✅ Login successful", data);
-      toast.success('Welcome back!');
-      navigate('/');
-    } catch (error) {
-      console.error("❌ Login error:", error);
-      
-      // Provide specific error messages
-      if (error.message.includes('Invalid login credentials')) {
-        toast.error('Invalid email or password. Please check your credentials.');
-      } else if (error.message.includes('Email not confirmed')) {
-        toast.error('Please confirm your email address before signing in.');
-      } else if (error.message.includes('Too many requests')) {
-        toast.error('Too many login attempts. Please wait a moment and try again.');
-      } else if (error.message.includes('captcha')) {
-        toast.error('CAPTCHA verification failed. Please try again.');
-      } else {
-        toast.error(error.message || 'Login failed. Please try again.');
-      }
-    }
-  };
-
-  async function onSubmit(e) {
+  async function handleLogin(e) {
     e.preventDefault();
 
     if (!captchaToken) {
@@ -61,7 +29,39 @@ export default function Login() {
     try {
       console.log('🔄 Attempting login with:', { email, hasPassword: !!password, hasToken: !!captchaToken });
       
-      await handleLogin(email, password, captchaToken);
+      // Enhanced login with better error handling
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.toLowerCase().trim(),
+        password,
+        options: {
+          captchaToken: captchaToken
+        }
+      });
+
+      if (error) {
+        console.error('❌ Login error details:', error);
+        
+        // Provide specific error messages
+        if (error.message.includes('Invalid login credentials')) {
+          throw new Error('Invalid email or password. Please check your credentials.');
+        } else if (error.message.includes('Email not confirmed')) {
+          throw new Error('Please confirm your email address before signing in.');
+        } else if (error.message.includes('Too many requests')) {
+          throw new Error('Too many login attempts. Please wait a moment and try again.');
+        } else if (error.message.includes('captcha')) {
+          throw new Error('CAPTCHA verification failed. Please try again.');
+        } else {
+          throw new Error(error.message || 'Login failed. Please try again.');
+        }
+      }
+
+      if (!data.user) {
+        throw new Error('Login failed - no user data received');
+      }
+
+      console.log('✅ Login successful for user:', data.user.email);
+      toast.success('Welcome back!');
+      navigate('/');
 
     } catch (err) {
       console.error('❌ Login error:', err);
@@ -89,7 +89,7 @@ export default function Login() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={onSubmit}>
+          <form className="space-y-6" onSubmit={handleLogin}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email address
