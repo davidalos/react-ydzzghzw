@@ -39,35 +39,21 @@ export function TurnstileWrapper({ onVerify, onError, onExpire }) {
   }, []);
 
   const handleVerify = (token) => {
-    if (!isProduction) {
-      // In development, always return a dummy token that matches Login.jsx expectations
-      console.log('🔧 Dev mode: Using dummy CAPTCHA token');
-      onVerify('dummy-token-for-development');
-    } else {
-      console.log('✅ CAPTCHA verified successfully');
-      onVerify(token);
-    }
+    // Always pass the actual token from Turnstile, whether it's test or production
+    console.log(isProduction ? '✅ CAPTCHA verified successfully' : '🔧 Test CAPTCHA token received');
+    onVerify(token);
   };
 
   const handleError = (error) => {
     console.error('❌ CAPTCHA error:', error);
-    if (!isProduction) {
-      // In development, simulate successful verification even on error
-      console.log('🔧 Dev mode: Bypassing CAPTCHA error');
-      onVerify('dummy-token-for-development');
-    } else {
-      onError && onError();
-    }
+    // Let the parent component handle the error properly
+    onError && onError();
   };
 
   const handleExpire = () => {
     console.log('⏰ CAPTCHA expired');
-    if (!isProduction) {
-      // In development, auto-renew with dummy token
-      onVerify('dummy-token-for-development');
-    } else {
-      onExpire && onExpire();
-    }
+    // Let the parent component handle the expiration properly
+    onExpire && onExpire();
   };
 
   if (isLoading) {
@@ -100,7 +86,7 @@ export function TurnstileWrapper({ onVerify, onError, onExpire }) {
       />
       {!isProduction && (
         <div className="text-xs text-gray-500 bg-yellow-50 px-2 py-1 rounded">
-          Development Mode - CAPTCHA Bypassed
+          Development Mode - Using Test Token
         </div>
       )}
     </div>
