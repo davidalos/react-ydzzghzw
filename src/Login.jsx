@@ -8,13 +8,45 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState(null);
+  const [captchaToken, setCaptchaToken] = useState(null);
   const navigate = useNavigate();
 
-  async function handleLogin(e) {
+  const handleLogin = async (email, password, captchaToken) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+        options: {
+          captchaToken, // <-- add this
+        },
+      });
+
+      if (error) throw error;
+      console.log("✅ Login successful", data);
+      toast.success('Welcome back!');
+      navigate('/');
+    } catch (error) {
+      console.error("❌ Login error:", error);
+      
+      // Provide specific error messages
+      if (error.message.includes('Invalid login credentials')) {
+        toast.error('Invalid email or password. Please check your credentials.');
+      } else if (error.message.includes('Email not confirmed')) {
+        toast.error('Please confirm your email address before signing in.');
+      } else if (error.message.includes('Too many requests')) {
+        toast.error('Too many login attempts. Please wait a moment and try again.');
+      } else if (error.message.includes('captcha')) {
+        toast.error('CAPTCHA verification failed. Please try again.');
+      } else {
+        toast.error(error.message || 'Login failed. Please try again.');
+      }
+    }
+  };
+
+  async function onSubmit(e) {
     e.preventDefault();
 
-    if (!turnstileToken) {
+    if (!captchaToken) {
       toast.error('Please complete the CAPTCHA verification');
       return;
     }
@@ -27,49 +59,9 @@ export default function Login() {
     setLoading(true);
 
     try {
-      console.log('🔄 Attempting login with:', { email, hasPassword: !!password, hasToken: !!turnstileToken });
+      console.log('🔄 Attempting login with:', { email, hasPassword: !!password, hasToken: !!captchaToken });
       
-      // Prepare login options - include captcha token
-      const loginOptions = {
-        email: email.toLowerCase().trim(),
-        password,
-      };
-
-      // Include captcha token for verification
-      const isDevelopment = import.meta.env.DEV;
-      const isDummyToken = turnstileToken === 'dummy-token-for-development';
-      
-      if (!isDevelopment || !isDummyToken) {
-        loginOptions.options = {
-          captchaToken: turnstileToken
-        };
-      }
-
-      // Enhanced login with better error handling
-      const { data, error } = await supabase.auth.signInWithPassword(loginOptions);
-
-      if (error) {
-        console.error('❌ Login error details:', error);
-        
-        // Provide specific error messages
-        if (error.message.includes('Invalid login credentials')) {
-          throw new Error('Invalid email or password. Please check your credentials.');
-        } else if (error.message.includes('Email not confirmed')) {
-          throw new Error('Please confirm your email address before signing in.');
-        } else if (error.message.includes('Too many requests')) {
-          throw new Error('Too many login attempts. Please wait a moment and try again.');
-        } else {
-          throw new Error(error.message || 'Login failed. Please try again.');
-        }
-      }
-
-      if (!data.user) {
-        throw new Error('Login failed - no user data received');
-      }
-
-      console.log('✅ Login successful for user:', data.user.email);
-      toast.success('Welcome back!');
-      navigate('/');
+      await handleLogin(email, password, captchaToken);
 
     } catch (err) {
       console.error('❌ Login error:', err);
@@ -97,7 +89,7 @@ export default function Login() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={handleLogin}>
+          <form className="space-y-6" onSubmit={onSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email address
@@ -136,15 +128,15 @@ export default function Login() {
             </div>
 
             <TurnstileWrapper
-              onVerify={(token) => setTurnstileToken(token)}
-              onError={() => setTurnstileToken(null)}
-              onExpire={() => setTurnstileToken(null)}
+              onVerify={(token) => setCaptchaToken(token)}
+              onError={() => setCaptchaToken(null)}
+              onExpire={() => setCaptchaToken(null)}
             />
 
             <div>
               <button
                 type="submit"
-                disabled={loading || !turnstileToken || !email || !password}
+                disabled={loading || !captchaToken || !email || !password}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 {loading ? (
