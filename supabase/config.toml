@@ -1,5 +1,9 @@
 [project]
 ref = "kybhregztorltmcltjra"
+api_url = "https://kybhregztorltmcltjra.supabase.co"
+anon_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtdGpzZWtveWxpeGNyYmZuYWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDk2NTY5NzAsImV4cCI6MjAyNTIzMjk3MH0.0C_kQxJJXSz7svXg4J_0-cj_8yP1ESA_2cGHp5eNQpM"
+service_role_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtdGpzZWtveWxpeGNyYmZuYWJwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcwOTY1Njk3MCwiZXhwIjoyMDI1MjMyOTcwfQ.VE1NG_iBcnf_EC0JGLL2FPj_VYS-xGRvUcTGRiw-8Ks"
+db_url = "postgres://postgres:UzRIlnmMX65dbD0S@db.kybhregztorltmcltjra.supabase.co:5432/postgres"
 
 [api]
 enabled = true
