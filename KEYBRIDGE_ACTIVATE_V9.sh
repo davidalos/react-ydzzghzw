@@ -18,15 +18,20 @@ set -e
 
 if [ ! -f .env ]; then
   cat > .env <<EOF
-SUPABASE_PROJECT_REF=kybhregztorltmcltjra
-SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5YmhyZWd6dG9ybHRtY2x0anJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM0MjU4NzQsImV4cCI6MjA0OTAwMTg3NH0.VQxJZ8wBcgBqJGqxOLNqZvQxQvQxQvQxQvQxQvQxQvQ
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5YmhyZWd6dG9ybHRtY2x0anJhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMzQyNTg3NCwiZXhwIjoyMDQ5MDAxODc0fQ.VQxJZ8wBcgBqJGqxOLNqZvQxQvQxQvQxQvQxQvQxQvQ
-SUPABASE_URL=https://kybhregztorltmcltjra.supabase.co
-SUPABASE_DB_URL=postgresql://postgres:[YOUR-PASSWORD]@db.kybhregztorltmcltjra.supabase.co:5432/postgres
+SUPABASE_DB_URL=postgres://postgres:UzRIlnmMX65dbD0S@db.kybhregztorltmcltjra.supabase.co:5432/postgres
+
+# Supabase
 VITE_SUPABASE_URL=https://kybhregztorltmcltjra.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5YmhyZWd6dG9ybHRtY2x0anJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM0MjU4NzQsImV4cCI6MjA0OTAwMTg3NH0.VQxJZ8wBcgBqJGqxOLNqZvQxQvQxQvQxQvQxQvQxQvQ
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtdGpzZWtveWxpeGNyYmZuYWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDk2NTY5NzAsImV4cCI6MjAyNTIzMjk3MH0.0C_kQxJJXSz7svXg4J_0-cj_8yP1ESA_2cGHp5eNQpM
+SUPABASE_URL=https://kybhregztorltmcltjra.supabase.co
+SUPABASE_PROJECT_REF=kybhregztorltmcltjra
+
+# For server-side only (do not expose to client!)
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtdGpzZWtveWxpeGNyYmZuYWJwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcwOTY1Njk3MCwiZXhwIjoyMDI1MjMyOTcwfQ.VE1NG_iBcnf_EC0JGLL2FPj_VYS-xGRvUcTGRiw-8Ks
+
+# Turnstile (Cloudflare CAPTCHA)
 VITE_TURNSTILE_SITE_KEY=0x4AAAAAABf8GGR3DrgJYy7g
-TURNSTILE_SECRET_KEY=0x4AAAAAABf8GBb27IJHtqpE9FfZdp-DRNU
+TURNSTILE_SECRET_KEY=0x4AAAAAABf8GGSBgGvWBgwAZl_FYgQvP3
 EOF
 fi
 
@@ -37,7 +42,7 @@ cat > supabase/config.toml <<EOF
 [project]
 ref = "$SUPABASE_PROJECT_REF"
 api_url = "$SUPABASE_URL"
-anon_key = "$SUPABASE_ANON_KEY"
+anon_key = "$VITE_SUPABASE_ANON_KEY"
 service_role_key = "$SUPABASE_SERVICE_ROLE_KEY"
 EOF
 
@@ -79,7 +84,7 @@ cat > vercel.json <<EOF
 {
   "env": {
     "SUPABASE_PROJECT_REF": "$SUPABASE_PROJECT_REF",
-    "SUPABASE_ANON_KEY": "$SUPABASE_ANON_KEY",
+    "VITE_SUPABASE_ANON_KEY": "$VITE_SUPABASE_ANON_KEY",
     "TURNSTILE_SECRET_KEY": "$TURNSTILE_SECRET_KEY"
   },
   "build": {
@@ -116,7 +121,7 @@ settings:
     - .env
   env:
     - SUPABASE_PROJECT_REF
-    - SUPABASE_ANON_KEY
+    - VITE_SUPABASE_ANON_KEY
     - SUPABASE_SERVICE_ROLE_KEY
 EOF
 
@@ -141,7 +146,7 @@ fi
 
 cat > .env.example <<EOF
 SUPABASE_PROJECT_REF=your-project-ref
-SUPABASE_ANON_KEY=...
+VITE_SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...
 EOF
 
