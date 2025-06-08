@@ -113,6 +113,12 @@ export interface Database {
             columns: ["created_by"]
             referencedRelation: "users"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goals_client_id_fkey"
+            columns: ["client_id"]
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
           }
         ]
       }
